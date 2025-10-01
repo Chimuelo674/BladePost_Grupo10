@@ -20,7 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 
-// Define las rutas (Routes)
+// Define las rutas (Routes))
 object Screens {
     const val HOME_SCREEN = "home"
     const val DETAIL_SCREEN = "detail/{categoryId}" // Ruta con argumento

@@ -45,7 +45,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 
-// 1. DEFINICIONES DE DATOS Y TEMA (Sin cambios)
+// 1. DEFINICIONES DE DATOS Y TEMA (Sin cambios))
 
 data class Category(val id: Int, val name: String, val color: Color)
 

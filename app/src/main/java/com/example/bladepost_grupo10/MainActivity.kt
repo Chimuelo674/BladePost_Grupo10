@@ -115,7 +115,7 @@ fun AppNavigator() {
 }
 
 
-// 5. COMPONENTES EXTRA (Sin cambios)
+// 5. COMPONENTES EXTRA (Sin cambios))
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Text(

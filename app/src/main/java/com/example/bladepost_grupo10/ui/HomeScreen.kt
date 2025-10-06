@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Switch
@@ -40,7 +41,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -147,7 +147,7 @@ fun HomeScreen(navController: NavHostController) {
                                 isSearchVisible = false // Cierra la búsqueda
                                 searchQuery = ""        // Limpia el texto
                             }) {
-                                Icon(Icons.Filled.ArrowBack, contentDescription = "Volver")
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
                             }
                         },
                         actions = {
@@ -221,6 +221,7 @@ fun HomeScreen(navController: NavHostController) {
                     )
                 } // Fin de la lógica condicional de TopAppBar
             }
+
         ){ innerPadding ->
             // CONTENIDO PRINCIPAL
             Column(
@@ -242,6 +243,7 @@ fun HomeScreen(navController: NavHostController) {
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
+
                 LazyRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -254,9 +256,13 @@ fun HomeScreen(navController: NavHostController) {
                         }
                     }
                 }
-                Button(onClick = {/* acción futura */ }) {
+                Button(onClick = { }) {
                     Text("Presióname")
                 }
+
+
+
+
 
                 Image(
                     painter = painterResource(id = R.drawable.logo),
@@ -266,6 +272,8 @@ fun HomeScreen(navController: NavHostController) {
                         .height(150.dp),
                     contentScale = ContentScale.Fit
                 )
+
+
             }
         }
     }
@@ -280,3 +288,6 @@ fun HomeScreenPreview(){
     val mockNavController = rememberNavController()
     HomeScreen(navController = mockNavController)
 }
+
+
+

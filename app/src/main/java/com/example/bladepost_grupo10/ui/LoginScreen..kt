@@ -1,0 +1,126 @@
+package com.example.bladepost_grupo10.ui
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+// 🚀 NECESITAS ESTA IMPORTACIÓN (Asumiendo que Screens está en el paquete raíz)
+import com.example.bladepost_grupo10.Screens
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LoginScreen(navController: NavHostController) {
+    // BLOQUES REMOVIDOS Y REEMPLAZADOS POR LA IMPORTACIÓN DE ARRIBA
+
+    // 1. ESTADOS para almacenar los datos del formulario y el estado de la UI
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var loginMessage by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
+
+    // Función de validación y navegación
+    val onLoginClick: () -> Unit = {
+        if (email.isEmpty() || password.isEmpty()) {
+            loginMessage = "Por favor, ingresa tu correo y contraseña."
+        } else if (email == "usuario@test.com" && password == "1234") {
+            loginMessage = "¡Inicio de sesión exitoso! 🎉"
+
+            // 🚀 USAMOS EL OBJETO SCREENS GLOBAL
+            navController.navigate(Screens.HOME_SCREEN) {
+                // Elimina todas las pantallas hasta el LOGIN_SCREEN, incluyéndolo.
+                popUpTo(Screens.LOGIN_SCREEN) { inclusive = true }
+            }
+
+        } else {
+            loginMessage = "Credenciales inválidas. Inténtalo de nuevo."
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(title = { Text("Inicio de Sesión") })
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
+        ) {
+
+            Text(
+                text = "BladePost Login",
+                style = MaterialTheme.typography.headlineLarge,
+                modifier = Modifier.padding(bottom = 24.dp)
+            )
+
+            // CAMPO DE CORREO / USUARIO
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Correo Electrónico o Usuario") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // CAMPO DE CONTRASEÑA
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Contraseña") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(imageVector = image, contentDescription = "Mostrar/Ocultar contraseña")
+                    }
+                }
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // BOTÓN DE LOGIN
+            Button(
+                onClick = onLoginClick,
+                modifier = Modifier.fillMaxWidth().height(50.dp),
+                enabled = email.isNotEmpty() && password.isNotEmpty()
+            ) {
+                Text("Iniciar Sesión")
+            }
+
+            // MENSAJE DE VALIDACIÓN
+            if (loginMessage.isNotEmpty()) {
+                Text(
+                    text = loginMessage,
+                    color = if (loginMessage.contains("exitoso")) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(top = 16.dp)
+                )
+            }
+        }
+    }
+}
+
+// Preview para ver el diseño en Android Studio
+@Preview(showBackground = true)
+@Composable
+fun LoginScreenPreview() {
+    MaterialTheme {
+        LoginScreen(navController = rememberNavController())
+    }
+}

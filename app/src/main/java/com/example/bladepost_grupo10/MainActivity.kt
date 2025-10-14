@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavType
 import com.example.bladepost_grupo10.ui.theme.BladePost_Grupo10Theme
-import com.example.bladepost_grupo10.ui.HomeScreen // Asegúrate de que esta ruta es correcta
+import com.example.bladepost_grupo10.ui.HomeScreen
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -30,16 +30,21 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
 import androidx.compose.ui.Alignment
 import androidx.navigation.NavHostController
+import com.example.bladepost_grupo10.ui.DetailScreen
+import com.example.bladepost_grupo10.ui.LoginScreen
+// ❌ La línea que causaba el error se ELIMINA: private val Screens.Companion.LOGIN_SCREEN: Any
 
-// 1. DEFINICIÓN DE RUTAS (SOLUCIÓN AL ERROR DE COMANDO)
+
+// 1. DEFINICIÓN DE RUTAS CON LOGIN INCLUIDO (CONSOLIDADO)
+// Nota: Si este objeto está en otro archivo, DEBES borrar este bloque y usar solo las importaciones.
 object Screens {
+    const val PROFILE_SCREEN = "profile"
+    const val LOGIN_SCREEN = "login" // 🚀 RUTA DE LOGIN AGREGADA
     const val HOME_SCREEN = "home"
     const val DETAIL_SCREEN = "detail/{categoryId}"
 }
 
-// 2. LA NUEVA PÁGINA (DETAILSCREEN)
-// Nota: Tu código original hacía una importación, pero es más limpio
-// definirla aquí si es una pantalla sencilla.
+// 2. LA NUEVA PÁGINA (DETAILSCREEN) - Sin cambios, está correcta aquí.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(navController: NavHostController, categoryId: Int?) {
@@ -49,7 +54,7 @@ fun DetailScreen(navController: NavHostController, categoryId: Int?) {
                 title = { Text("Detalle de Categoría ${categoryId ?: ""}") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
                     }
                 }
             )
@@ -74,14 +79,13 @@ fun DetailScreen(navController: NavHostController, categoryId: Int?) {
 }
 
 
-// 3. MAINACTIVITY CORREGIDO
+// 3. MAINACTIVITY CORREGIDO - Sin cambios
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             BladePost_Grupo10Theme {
-                // 🚀 Llamamos directamente a AppNavigator para que maneje las pantallas
                 AppNavigator()
             }
         }
@@ -89,18 +93,19 @@ class MainActivity : ComponentActivity() {
 }
 
 
-// 4. APPNAVIGATOR (Sin cambios en su lógica)
+// 4. APPNAVIGATOR - Sin cambios, ahora que Screens está corregido, esta función es válida.
 @Composable
 fun AppNavigator() {
     val navController = rememberNavController()
 
     NavHost(
         navController = navController,
-        startDestination = Screens.HOME_SCREEN
+        startDestination = Screens.LOGIN_SCREEN // Ahora sabe qué es LOGIN_SCREEN
     ) {
+        composable(Screens.LOGIN_SCREEN){
+            LoginScreen(navController = navController)
+        }
         composable(Screens.HOME_SCREEN) {
-            // Pasamos el NavController a HomeScreen
-            // ¡Asegúrate de que HomeScreen acepte NavHostController!
             HomeScreen(navController = navController)
         }
 
@@ -111,11 +116,12 @@ fun AppNavigator() {
             val categoryId = backStackEntry.arguments?.getInt("categoryId")
             DetailScreen(navController = navController, categoryId = categoryId)
         }
+
     }
 }
 
 
-// 5. COMPONENTES EXTRA (Sin cambios))
+// 5. COMPONENTES EXTRA (Sin cambios)
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Text(

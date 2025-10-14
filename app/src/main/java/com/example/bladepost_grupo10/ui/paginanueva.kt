@@ -20,14 +20,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 
-// Define las rutas (Routes))
+// SE ELIMINA EL OBJETO SCREENS COMPLETO
+/*
 object Screens {
+    val PROFILE_SCREEN: Any // LÍNEA 25: ESTO CAUSA EL ERROR
     const val HOME_SCREEN = "home"
-    const val DETAIL_SCREEN = "detail/{categoryId}" // Ruta con argumento
+    const val DETAIL_SCREEN = "detail/{categoryId}"
 }
+*/
 
 // ----------------------------------------------------------------------
-// FUNCIÓN DETAILSCREEN CORREGIDA
+// FUNCIÓN DETAILSCREEN
 // ----------------------------------------------------------------------
 
 @OptIn(ExperimentalMaterial3Api::class)

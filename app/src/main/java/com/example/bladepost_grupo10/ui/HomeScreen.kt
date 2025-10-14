@@ -3,7 +3,6 @@ package com.example.bladepost_grupo10.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import com.example.bladepost_grupo10.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,39 +12,44 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.graphics.Color
-import androidx.compose.material3.Icon
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Switch
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.bladepost_grupo10.R
+// Asegúrate de que tu objeto Screens esté disponible (asumimos que está en el paquete raíz)
+import com.example.bladepost_grupo10.Screens
 
-// 1. DEFINICIONES DE DATOS Y TEMA (Sin cambios))
+
+// 1. DEFINICIONES DE DATOS Y TEMA (Sin cambios)
 
 data class Category(val id: Int, val name: String, val color: Color)
 
@@ -110,7 +114,7 @@ fun CategoryChip(category: Category, onCategoryClick: (Category) -> Unit) {
     }
 }
 
-// 2. FUNCIÓN DE PANTALLA PRINCIPAL (HomeScreen) - Sin cambios
+// 2. FUNCIÓN DE PANTALLA PRINCIPAL (HomeScreen) - CORREGIDA
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -147,7 +151,7 @@ fun HomeScreen(navController: NavHostController) {
                                 isSearchVisible = false // Cierra la búsqueda
                                 searchQuery = ""        // Limpia el texto
                             }) {
-                                Icon(Icons.Filled.ArrowBack, contentDescription = "Volver")
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
                             }
                         },
                         actions = {
@@ -167,13 +171,13 @@ fun HomeScreen(navController: NavHostController) {
                             Text("Blade Post APP" + (selectedCategory?.let { " - ${it.name}" } ?: ""),
                                 color = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.clickable {
-                                    println("\"Título de la app clickeado: Volviendo al inicio.")
+                                    println("Título de la app clickeado: Volviendo al inicio.")
                                     selectedCategory = null
                                 }
                             )
                         },
                         navigationIcon = {
-                            // Menú Desplegable de Categorías
+                            // 🚀 CORRECCIÓN 1: Dejamos este IconButton SOLO para abrir el DropdownMenu
                             IconButton(onClick = { isMenuExpanded = true }) {
                                 Icon(
                                     imageVector = Icons.Filled.Menu,
@@ -181,6 +185,7 @@ fun HomeScreen(navController: NavHostController) {
                                     tint = MaterialTheme.colorScheme.onSurface
                                 )
                             }
+                            // Menú Desplegable de Categorías
                             DropdownMenu(
                                 expanded = isMenuExpanded,
                                 onDismissRequest = { isMenuExpanded = false }
@@ -209,6 +214,19 @@ fun HomeScreen(navController: NavHostController) {
                                 modifier = Modifier.padding(end = 8.dp),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
+
+                            // 🚀 CORRECCIÓN 2: BOTÓN DE PERFIL para navegar a la nueva página (PROFILE_SCREEN)
+                            IconButton(onClick = {
+                                // Vincula el IconButton a la nueva página de perfil
+                                navController.navigate(Screens.PROFILE_SCREEN)
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Person,
+                                    contentDescription = "Ir a Perfil",
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+
                             // BOTÓN QUE ACTIVA EL MODO BÚSQUEDA
                             IconButton(onClick = { isSearchVisible = true }) {
                                 Icon(
@@ -221,6 +239,7 @@ fun HomeScreen(navController: NavHostController) {
                     )
                 } // Fin de la lógica condicional de TopAppBar
             }
+
         ){ innerPadding ->
             // CONTENIDO PRINCIPAL
             Column(
@@ -242,6 +261,7 @@ fun HomeScreen(navController: NavHostController) {
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
+
                 LazyRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -249,12 +269,12 @@ fun HomeScreen(navController: NavHostController) {
                     items(dummyCategories) { category ->
                         CategoryChip(category = category) { clickedCategory ->
                             println("Categoría clickeada: ${clickedCategory.name}")
-                            // Lógica de Navegación
+                            // Lógica de Navegación a DetailScreen
                             navController.navigate("detail/${clickedCategory.id}")
                         }
                     }
                 }
-                Button(onClick = {/* acción futura */ }) {
+                Button(onClick = { }) {
                     Text("Presióname")
                 }
 
@@ -276,7 +296,10 @@ fun HomeScreen(navController: NavHostController) {
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview(){
-    // 💡 CORRECCIÓN: Creamos un NavHostController ficticio para el Preview
+    // Creamos un NavHostController ficticio para el Preview
     val mockNavController = rememberNavController()
     HomeScreen(navController = mockNavController)
 }
+
+
+

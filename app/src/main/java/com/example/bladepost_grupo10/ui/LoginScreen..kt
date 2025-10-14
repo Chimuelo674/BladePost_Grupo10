@@ -36,7 +36,7 @@ fun LoginScreen(navController: NavHostController) {
         } else if (email == "usuario@test.com" && password == "1234") {
             loginMessage = "¡Inicio de sesión exitoso! 🎉"
 
-            // 🚀 USAMOS EL OBJETO SCREENS GLOBAL
+            // USAMOS EL OBJETO SCREENS GLOBAL
             navController.navigate(Screens.HOME_SCREEN) {
                 // Elimina todas las pantallas hasta el LOGIN_SCREEN, incluyéndolo.
                 popUpTo(Screens.LOGIN_SCREEN) { inclusive = true }

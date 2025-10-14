@@ -20,7 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 
-// SE ELIMINA EL OBJETO SCREENS COMPLETO
+//SE ELIMINA EL OBJETO SCREENS COMPLETO
 /*
 object Screens {
     val PROFILE_SCREEN: Any // LÍNEA 25: ESTO CAUSA EL ERROR

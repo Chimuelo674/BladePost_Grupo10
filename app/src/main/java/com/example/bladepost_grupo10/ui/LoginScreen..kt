@@ -112,6 +112,14 @@ fun LoginScreen(navController: NavHostController) {
                     modifier = Modifier.padding(top = 16.dp)
                 )
             }
+            TextButton(
+                onClick = {
+                    navController.navigate(Screens.REGISTER_SCREEN)
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("¿No tienes una cuenta? Registrate aquí")
+            }
         }
     }
 }

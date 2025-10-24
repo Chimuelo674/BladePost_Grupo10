@@ -32,6 +32,9 @@ import androidx.compose.ui.Alignment
 import androidx.navigation.NavHostController
 import com.example.bladepost_grupo10.ui.DetailScreen
 import com.example.bladepost_grupo10.ui.LoginScreen
+import com.example.bladepost_grupo10.ui.RegistroScreen
+
+
 // La línea que causaba el error se ELIMINA: private val Screens.Companion.LOGIN_SCREEN: Any
 
 
@@ -42,6 +45,10 @@ object Screens {
     const val LOGIN_SCREEN = "login" // 🚀 RUTA DE LOGIN AGREGADA
     const val HOME_SCREEN = "home"
     const val DETAIL_SCREEN = "detail/{categoryId}"
+
+    const val REGISTER_SCREEN = "register"
+
+
 }
 
 // 2. LA NUEVA PÁGINA (DETAILSCREEN) - Sin cambios, está correcta aquí.
@@ -105,10 +112,12 @@ fun AppNavigator() {
         composable(Screens.LOGIN_SCREEN){
             LoginScreen(navController = navController)
         }
+        composable (Screens.REGISTER_SCREEN) {
+            RegistroScreen(navController = navController)
+        }
         composable(Screens.HOME_SCREEN) {
             HomeScreen(navController = navController)
         }
-
         composable(
             Screens.DETAIL_SCREEN,
             arguments = listOf(navArgument("categoryId") { type = NavType.IntType })

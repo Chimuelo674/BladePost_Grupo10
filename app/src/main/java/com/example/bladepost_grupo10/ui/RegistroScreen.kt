@@ -10,10 +10,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 
 
 @Composable
-fun RegistroScreen(){
+fun RegistroScreen(navController: NavHostController){
     val context = LocalContext.current
 
     var nombre by remember { mutableStateOf("") }
@@ -85,7 +86,14 @@ fun RegistroScreen(){
                     usuario.isEmpty() -> Toast.makeText(context, "Ingresar tu nombre de usuario", Toast.LENGTH_SHORT).show()
                     correo.isEmpty() || !correo.contains("@")-> Toast.makeText(context, "Correo electrónico invalido", Toast.LENGTH_SHORT).show()
                     contrasena.length< 6 -> Toast.makeText(context, "La contraseña debe tener seis caracteres", Toast.LENGTH_SHORT).show()
-                    else -> Toast.makeText(context, "Registro exitoso(datos listos para guardar)", Toast.LENGTH_SHORT).show()
+                    else -> {
+                        Toast.makeText(
+                            context,
+                            "Registro exitoso(datos listos para guardar)",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        navController.popBackStack()
+                    }
                 }
             },
             modifier = Modifier.fillMaxWidth()

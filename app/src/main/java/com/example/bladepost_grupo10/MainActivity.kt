@@ -32,7 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.navigation.NavHostController
 import com.example.bladepost_grupo10.ui.DetailScreen
 import com.example.bladepost_grupo10.ui.LoginScreen
-// La línea que causaba el error se ELIMINA: private val Screens.Companion.LOGIN_SCREEN: Any
+//La línea que causaba el error se ELIMINA: private val Screens.Companion.LOGIN_SCREEN: Any
 
 
 // 1. DEFINICIÓN DE RUTAS CON LOGIN INCLUIDO (CONSOLIDADO)

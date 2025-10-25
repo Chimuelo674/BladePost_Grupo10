@@ -5,13 +5,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import com.example.bladepost_grupo10.R
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row // Importación necesaria
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size // Importación necesaria
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -48,16 +51,26 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.bladepost_grupo10.Screens
+import com.example.bladepost_grupo10.Screens // 🚀 IMPORTACIÓN CLAVE AÑADIDA
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.IntrinsicSize // Importación necesaria
+import androidx.compose.ui.draw.clip // Importación necesaria
 
-//1. DEFINICIONES DE DATOS Y TEMA (Sin cambios))
+
+// --- 1. DEFINICIONES DE DATOS Y TEMA ---
 
 data class Category(val id: Int, val name: String, val color: Color)
+data class NewsItem(val id: Int, val title: String, val summary: String, val imageUrl: Int) // CLASE AÑADIDA
 data class ForumItem(val id: Int, val user: String, val comment: String, val categoryId: Int)
-// Datos de ejemplo para Comentarios o Preguntas Frecuentes
+
+// DATOS DE EJEMPLO DE NOTICIAS (Para uso futuro si se usa NewsCard)
+val dummyNews = listOf(
+    NewsItem(101, "Lanzamiento: Nuevo Bey de Resistencia", "Analizamos el nuevo modelo que promete un giro infinito.", R.drawable.noticia_resistencia),
+    NewsItem(102, "Claves del Campeonato Mundial", "Las estrategias de balance que dominaron el torneo pasado.", R.drawable.noticia_balance),
+    NewsItem(103, "Customización Prohibida", "Los drivers que la organización vetó por ser demasiado poderosos.", R.drawable.noticia_prohibida)
+)
 
 val dummyForumItems = listOf(
     ForumItem(201, "BladeMaestro", "¿Cómo consigo el Bey de Ataque Feroz?", 1),
@@ -127,7 +140,45 @@ fun CategoryChip(category: Category, onCategoryClick: (Category) -> Unit) {
     }
 }
 
-// 2. FUNCIÓN DE PANTALLA PRINCIPAL (HomeScreen)
+// Nota: No se está usando la función NewsCard en el código que enviaste, solo las imágenes sueltas.
+
+@Composable
+fun ForumCard(item: ForumItem) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        shape = MaterialTheme.shapes.small,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp)
+        ) {
+            Text(
+                text = item.user,
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = item.comment,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Categoría: ${dummyCategories.find { it.id == item.categoryId }?.name ?: "N/A"}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+
+// --- 2. FUNCIÓN DE PANTALLA PRINCIPAL (HomeScreen) ---
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -184,7 +235,6 @@ fun HomeScreen(navController: NavHostController) {
                             Text("Blade Post" + (selectedCategory?.let { " - ${it.name}" } ?: ""),
                                 color = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.clickable {
-                                    println("\"Título de la app clickeado: Volviendo al inicio.")
                                     selectedCategory = null
                                 }
                             )
@@ -242,11 +292,9 @@ fun HomeScreen(navController: NavHostController) {
 
             // LÓGICA DE FILTRADO APLICADA AL CONTENIDO PRINCIPAL
             val filteredCategories = dummyCategories.filter {
-                // Filtra solo si hay un texto de búsqueda (searchQuery)
                 if (searchQuery.isBlank()) {
-                    true // Muestra todas si la búsqueda está vacía
+                    true
                 } else {
-                    // Filtra por nombre de categoría (ignorando mayúsculas/minúsculas)
                     it.name.contains(searchQuery, ignoreCase = true)
                 }
             }
@@ -273,13 +321,12 @@ fun HomeScreen(navController: NavHostController) {
                 )
 
                 LazyRow(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max), // Ajuste para que LazyRow funcione dentro de Column scrollable
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     // USAR LA LISTA FILTRADA EN EL LAZYROW
                     items(filteredCategories) { category ->
                         CategoryChip(category = category) { clickedCategory ->
-                            println("Categoría clickeada: ${clickedCategory.name}")
                             // Lógica de Navegación
                             navController.navigate("detail/${clickedCategory.id}")
                         }
@@ -299,12 +346,12 @@ fun HomeScreen(navController: NavHostController) {
 
                 Button(onClick = {
                     // VINCULACIÓN AL FORO:
-                    navController.navigate(Screens.FORUM_SCREEN)
+                    navController.navigate(Screens.LOGIN_SCREEN) // 🚀 Solucionado con la importación
                 }) {
-                    Text("Crear Pregunta") // Texto actualizado
+                    Text("Crear Pregunta")
                 }
 
-                // --- Bloque de Imágenes de Noticias ---
+                // --- Bloque de Imágenes de Noticias (Sueltas) ---
                 Image(
                     painter = painterResource(id = R.drawable.noticia_resistencia),
                     contentDescription = "resistencia",
@@ -347,40 +394,36 @@ fun HomeScreen(navController: NavHostController) {
                     }
                 }
 
-                Spacer(modifier = Modifier.height(20.dp)) // Espacio antes del logo
+                Spacer(modifier = Modifier.height(20.dp))
 
-                // AJUSTE DEL TAMAÑO Y POSICIONAMIENTO DEL LOGO (Al final de la pantalla)
-                Image(
-                    painter = painterResource(id = R.drawable.logo),
-                    contentDescription = "Logo App",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(100.dp), // Tamaño más pequeño para el logo de cierre
-                    contentScale = ContentScale.Fit
-                )
-                Spacer(modifier = Modifier.height(24.dp)) // Espacio final
-                Spacer(modifier = Modifier.height(30.dp))
+                // SECCIÓN: Eventos de la Comunidad
                 Text(
                     text = "🔥 Eventos de la Comunidad",
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-// Nueva Imagen o Banner
-                Image(
-                    painter = painterResource(id = R.drawable.nuevo_evento), // Asegúrate de tener este recurso
-                    contentDescription = "Nuevo Evento",
+
+                // Placeholder para la imagen "nuevo_evento" que no está definida
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(180.dp),
-                    contentScale = ContentScale.Crop // Usar Crop para llenar el espacio
-                )
-// Texto explicativo opcional
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFA07A)) // Color de placeholder
+                ) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("IMAGEN DE EVENTO AQUÍ", color = Color.Black)
+                    }
+                }
+
+                // Texto explicativo opcional
                 Text(
                     text = "¡Participa en el torneo semanal y gana piezas raras!",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(20.dp))
+
+                // SECCIÓN: Top 5 Bladers
                 Text(
                     text = "🥇 Top 5 Bladers de la Semana",
                     style = MaterialTheme.typography.titleMedium,
@@ -405,51 +448,30 @@ fun HomeScreen(navController: NavHostController) {
                         }
                     }
                 }
+
+                Spacer(modifier = Modifier.height(20.dp)) // Espacio antes del logo
+
+                // AJUSTE DEL TAMAÑO Y POSICIONAMIENTO DEL LOGO (Al final de la pantalla)
+                Image(
+                    painter = painterResource(id = R.drawable.logo),
+                    contentDescription = "Logo App",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp), // Tamaño más pequeño para el logo de cierre
+                    contentScale = ContentScale.Fit
+                )
+                Spacer(modifier = Modifier.height(24.dp)) // Espacio final
             }
         }
     }
 }
-@Composable
-fun ForumCard(item: ForumItem) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        shape = MaterialTheme.shapes.small,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(12.dp)
-        ) {
-            Text(
-                text = item.user,
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = item.comment,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Categoría: ${dummyCategories.find { it.id == item.categoryId }?.name ?: "N/A"}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
 
-// 3. HOME SCREEN PREVIEW CORREGIDO
+
+// --- 3. HOME SCREEN PREVIEW CORREGIDO ---
 
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview(){
-    // CORRECCIÓN: Creamos un NavHostController ficticio para el Preview
     val mockNavController = rememberNavController()
     HomeScreen(navController = mockNavController)
 }

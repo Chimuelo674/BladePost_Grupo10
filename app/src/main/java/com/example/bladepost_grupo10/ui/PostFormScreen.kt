@@ -17,7 +17,7 @@ fun PostFormScreen(navController: NavHostController) {
     var questionText by remember { mutableStateOf("") }
     var titleText by remember { mutableStateOf("") }
 
-    // 🚀 HARDCODED USERNAME: Reemplazar con el nombre real del usuario logeado
+    // HARDCODED USERNAME: Reemplazar con el nombre real del usuario logeado
     val currentUserName = "Usuario_Autenticado_123"
 
     Scaffold(

@@ -22,7 +22,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.bladepost_grupo10.R // Asegúrate de tener esta importación
 
-// --- 1. ESTRUCTURAS DE DATOS ---
+// -- 1. ESTRUCTURAS DE DATOS --
 
 // Estructura para el contenido que lleva imagen
 data class DetailItem(val title: String, val description: String, val imageResId: Int)

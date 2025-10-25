@@ -5,8 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -41,7 +41,7 @@ fun ForumScreen(navController: NavHostController) {
                 title = { Text("Foro de Preguntas") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
                     }
                 }
             )
@@ -50,7 +50,7 @@ fun ForumScreen(navController: NavHostController) {
         floatingActionButton = {
             FloatingActionButton(onClick = {
                 // Navegar al formulario de creación (asumiendo que POST_FORM_SCREEN existe)
-                navController.navigate(Screens.POST_FORM_SCREEN)
+               navController.navigate(Screens.POST_FORM_SCREEN)
             }) {
                 Icon(Icons.Filled.Add, contentDescription = "Nueva pregunta")
             }

@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavType
 import com.example.bladepost_grupo10.ui.theme.BladePost_Grupo10Theme
-import com.example.bladepost_grupo10.ui.HomeScreen
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -32,16 +31,30 @@ import androidx.compose.ui.Alignment
 import androidx.navigation.NavHostController
 import com.example.bladepost_grupo10.ui.DetailScreen
 import com.example.bladepost_grupo10.ui.LoginScreen
+import com.example.bladepost_grupo10.ui.RegistroScreen
+import com.example.bladepost_grupo10.ui.HomeScreen
+import com.example.bladepost_grupo10.ui.ForumScreen
+import com.example.bladepost_grupo10.ui.PostFormScreen
+
 //La línea que causaba el error se ELIMINA: private val Screens.Companion.LOGIN_SCREEN: Any
 
 
 // 1. DEFINICIÓN DE RUTAS CON LOGIN INCLUIDO (CONSOLIDADO)
 // Nota: Si este objeto está en otro archivo, DEBES borrar este bloque y usar solo las importaciones.
 object Screens {
-    const val PROFILE_SCREEN = "profile"
+    //const val PROFILE_SCREEN = "profile"
     const val LOGIN_SCREEN = "login" // 🚀 RUTA DE LOGIN AGREGADA
     const val HOME_SCREEN = "home"
+
+    const val REGISTER_SCREEN ="register"
+    const val FORUM_SCREEN = "forum"
+
+    const val  POST_FORM_SCREEN = "post_from"
     const val DETAIL_SCREEN = "detail/{categoryId}"
+
+
+
+
 }
 
 // 2. LA NUEVA PÁGINA (DETAILSCREEN) - Sin cambios, está correcta aquí.
@@ -108,7 +121,15 @@ fun AppNavigator() {
         composable(Screens.HOME_SCREEN) {
             HomeScreen(navController = navController)
         }
-
+        composable(Screens.REGISTER_SCREEN ) {
+            RegistroScreen(navController= navController)
+        }
+        composable(Screens.FORUM_SCREEN) {
+            ForumScreen(navController = navController)
+        }
+        composable(Screens.POST_FORM_SCREEN) {
+            PostFormScreen(navController = navController)
+        }
         composable(
             Screens.DETAIL_SCREEN,
             arguments = listOf(navArgument("categoryId") { type = NavType.IntType })

@@ -7,14 +7,12 @@ import com.example.bladepost_grupo10.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row // Importación necesaria
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.size // Importación necesaria
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -47,7 +45,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -56,6 +53,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.IntrinsicSize // Importación necesaria
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.ui.draw.clip // Importación necesaria
 
 
@@ -215,7 +213,7 @@ fun HomeScreen(navController: NavHostController) {
                                 isSearchVisible = false // Cierra la búsqueda
                                 searchQuery = ""        // Limpia el texto
                             }) {
-                                Icon(Icons.Filled.ArrowBack, contentDescription = "Volver")
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
                             }
                         },
                         actions = {
@@ -321,7 +319,7 @@ fun HomeScreen(navController: NavHostController) {
                 )
 
                 LazyRow(
-                    modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max), // Ajuste para que LazyRow funcione dentro de Column scrollable
+                    modifier = Modifier.fillMaxWidth().height(50.dp), // Ajuste para que LazyRow funcione dentro de Column scrollable
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     // USAR LA LISTA FILTRADA EN EL LAZYROW
@@ -332,6 +330,9 @@ fun HomeScreen(navController: NavHostController) {
                         }
                     }
                 }
+
+
+
 
                 // Muestra un mensaje si no hay resultados y la búsqueda está activa
                 if (filteredCategories.isEmpty() && isSearchVisible) {
@@ -345,13 +346,12 @@ fun HomeScreen(navController: NavHostController) {
                 Spacer(modifier = Modifier.height(10.dp))
 
                 Button(onClick = {
-                    // VINCULACIÓN AL FORO:
-                    navController.navigate(Screens.LOGIN_SCREEN) // 🚀 Solucionado con la importación
+                    navController.navigate(Screens.FORUM_SCREEN)
                 }) {
                     Text("Crear Pregunta")
                 }
 
-                // --- Bloque de Imágenes de Noticias (Sueltas) ---
+                //* --- Bloque de Imágenes de Noticias (Sueltas) ---
                 Image(
                     painter = painterResource(id = R.drawable.noticia_resistencia),
                     contentDescription = "resistencia",
@@ -376,6 +376,30 @@ fun HomeScreen(navController: NavHostController) {
                         .height(150.dp),
                     contentScale = ContentScale.Fit
                 )
+
+                Text(
+                    text = "Últimas Noticias",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(top = 8.dp),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    dummyNews.forEach { newsItem ->
+                        Image(
+                            painter = painterResource(id = newsItem.imageUrl),
+                            contentDescription = newsItem.title,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(150.dp)
+                                .clip(RoundedCornerShape(8.dp)),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+
+
+
                 // --- Fin de Bloque de Imágenes de Noticias ---
 
                 Spacer(modifier = Modifier.height(20.dp))

@@ -11,16 +11,31 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
+// 🚀 IMPORTACIÓN CLAVE: Agrega esta línea
+import androidx.compose.ui.graphics.Color
+
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
     secondary = PurpleGrey80,
-    tertiary = Pink80
+    tertiary = Pink80,
+
+    // 🚀 CAMBIOS CLAVE PARA FONDO NEGRO
+    background = Color.Black, // Fondo principal: NEGRO
+    surface = Color.Black,    // Superficies como Cards o Scaffolds: NEGRO
+    onBackground = Color.White, // Color del texto sobre el fondo: BLANCO
+    onSurface = Color.White     // Color del texto sobre superficies: BLANCO
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = Purple40,
     secondary = PurpleGrey40,
-    tertiary = Pink40
+    tertiary = Pink40,
+
+    // 🚀 CAMBIOS CLAVE PARA FONDO BLANCO
+    background = Color.White,  // Fondo principal: BLANCO
+    surface = Color.White,     // Superficies como Cards o Scaffolds: BLANCO
+    onBackground = Color.Black,  // Color del texto sobre el fondo: NEGRO
+    onSurface = Color.Black      // Color del texto sobre superficies: NEGRO
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),

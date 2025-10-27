@@ -190,6 +190,7 @@ fun HomeScreen(navController: NavHostController) {
     var isSearchVisible by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
 
+
     AppTheme(darkTheme = isDarkTheme) {
         Scaffold(
             topBar = {
@@ -274,6 +275,13 @@ fun HomeScreen(navController: NavHostController) {
                                 modifier = Modifier.padding(end = 8.dp),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
+                            IconButton(onClick = { navController.navigate(Screens.PROFILE_SCREEN) }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Person, // Icono de persona
+                                    contentDescription = "Ir a Perfil",
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
                             // BOTÓN QUE ACTIVA EL MODO BÚSQUEDA
                             IconButton(onClick = { isSearchVisible = true }) {
                                 Icon(

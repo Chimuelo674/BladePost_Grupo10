@@ -35,6 +35,7 @@ import com.example.bladepost_grupo10.ui.RegistroScreen
 import com.example.bladepost_grupo10.ui.HomeScreen
 import com.example.bladepost_grupo10.ui.ForumScreen
 import com.example.bladepost_grupo10.ui.PostFormScreen
+import com.example.bladepost_grupo10.ui.PerfilScreen
 
 //La línea que causaba el error se ELIMINA: private val Screens.Companion.LOGIN_SCREEN: Any
 
@@ -42,7 +43,7 @@ import com.example.bladepost_grupo10.ui.PostFormScreen
 // 1. DEFINICIÓN DE RUTAS CON LOGIN INCLUIDO (CONSOLIDADO)
 // Nota: Si este objeto está en otro archivo, DEBES borrar este bloque y usar solo las importaciones.
 object Screens {
-    //const val PROFILE_SCREEN = "profile"
+    const val PROFILE_SCREEN = "profile"
     const val LOGIN_SCREEN = "login" // 🚀 RUTA DE LOGIN AGREGADA
     const val HOME_SCREEN = "home"
 
@@ -120,6 +121,9 @@ fun AppNavigator() {
         }
         composable(Screens.HOME_SCREEN) {
             HomeScreen(navController = navController)
+        }
+        composable(Screens.PROFILE_SCREEN) {
+            PerfilScreen(navController = navController)
         }
         composable(Screens.REGISTER_SCREEN ) {
             RegistroScreen(navController= navController)

@@ -13,11 +13,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.bladepost_grupo10.data.UsuarioDao
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegistroScreen(navController: NavHostController){
     val context = LocalContext.current
+    val usuarioDao = remember { UsuarioDao(context)}
 
     var nombre by remember { mutableStateOf("") }
     var usuario by remember { mutableStateOf("") }
@@ -53,8 +55,19 @@ fun RegistroScreen(navController: NavHostController){
                 hasError = true
         }
         if (!hasError) {
-            Toast.makeText(context, "Se a registrado correctamente", Toast.LENGTH_SHORT).show()
-            navController.popBackStack()
+            //verificar si el usuario o correo ya existen
+            val existe = usuarioDao.verificarUsuarioExistente(usuario, correo)
+            if (existe) {
+                Toast.makeText(context, "El usuario o correo ya estan registrados", Toast.LENGTH_SHORT).show()
+            } else {
+                val exito = usuarioDao.registrarUsuario(usuario, correo, contrasena)
+                if (exito) {
+                    Toast.makeText(context, "Usuario registrado correctamente", Toast.LENGTH_SHORT).show()
+                    navController.popBackStack() //volver a la pantalla anterior(login)
+                } else {
+                    Toast.makeText(context, "Error al registrar usuario", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 

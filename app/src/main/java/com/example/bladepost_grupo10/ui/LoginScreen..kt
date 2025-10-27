@@ -1,5 +1,6 @@
 package com.example.bladepost_grupo10.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
@@ -16,24 +17,29 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 // 🚀 NECESITAS ESTA IMPORTACIÓN (Asumiendo que Screens está en el paquete raíz)
 import com.example.bladepost_grupo10.Screens
+import com.example.bladepost_grupo10.data.UsuarioDao
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(navController: NavHostController) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val usuarioDao = remember {UsuarioDao(context)}
+
     // BLOQUES REMOVIDOS Y REEMPLAZADOS POR LA IMPORTACIÓN DE ARRIBA
 
     // 1. ESTADOS para almacenar los datos del formulario y el estado de la UI
-    var email by remember { mutableStateOf("") }
+
+    var emailOrUser by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var loginMessage by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
     // Función de validación y navegación
     val onLoginClick: () -> Unit = {
-        if (email.isEmpty() || password.isEmpty()) {
+        if (emailOrUser.isEmpty() || password.isEmpty()) {
             loginMessage = "Por favor, ingresa tu correo y contraseña."
-        } else if (email == "usuario@test.com" && password == "1234") {
+        } else if (emailOrUser == "usuario@test.com" && password == "1234") {
             loginMessage = "¡Inicio de sesión exitoso! 🎉"
 
             // USAMOS EL OBJETO SCREENS GLOBAL
@@ -69,8 +75,8 @@ fun LoginScreen(navController: NavHostController) {
 
             // CAMPO DE CORREO / USUARIO
             OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
+                value = emailOrUser,
+                onValueChange = { emailOrUser = it },
                 label = { Text("Correo Electrónico o Usuario") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
@@ -97,9 +103,24 @@ fun LoginScreen(navController: NavHostController) {
 
             // BOTÓN DE LOGIN
             Button(
-                onClick = onLoginClick,
+                onClick = {
+                    when {
+                        emailOrUser.isEmpty() || password.isEmpty() -> {
+                            Toast.makeText(context, "Completa todos los campos", Toast.LENGTH_SHORT).show()
+                        }
+                        usuarioDao.verificarCredenciales(emailOrUser, password) -> {
+                            Toast.makeText(context, "Inicio de sesion exitoso", Toast.LENGTH_SHORT).show()
+                            navController.navigate(Screens.HOME_SCREEN){
+                                popUpTo(Screens.LOGIN_SCREEN) {inclusive = true}
+                            }
+                        }
+                        else -> {
+                            Toast.makeText(context,"Credenciales invalidas", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                },
                 modifier = Modifier.fillMaxWidth().height(50.dp),
-                enabled = email.isNotEmpty() && password.isNotEmpty()
+                enabled = emailOrUser.isNotEmpty() && password.isNotEmpty()
             ) {
                 Text("Iniciar Sesión")
             }

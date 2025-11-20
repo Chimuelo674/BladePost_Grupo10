@@ -88,7 +88,7 @@ fun LoginScreen(navController: NavHostController) {
                 modifier = Modifier.padding(bottom = 24.dp)
             )
 
-            // CAMPO DE CORREO / USUARIO
+            //CAMPO DE CORREO / USUARIO
             OutlinedTextField(
                 value = emailOrUser,
                 onValueChange = { emailOrUser = it },

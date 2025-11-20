@@ -387,7 +387,7 @@ fun HomeScreen(
                 color = MaterialTheme.colorScheme.onBackground
             )
 
-            // ✅ SECCIÓN DE IMAGEN DE EVENTO CORREGIDA
+            //✅ SECCIÓN DE IMAGEN DE EVENTO CORREGIDA
             Card(
                 modifier = Modifier
                     .fillMaxWidth()

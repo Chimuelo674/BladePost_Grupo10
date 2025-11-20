@@ -114,7 +114,7 @@ fun AppNavigation(
 }
 
 
-// 3. LA CLASE PRINCIPAL (MainActivity)
+//3. LA CLASE PRINCIPAL (MainActivity)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

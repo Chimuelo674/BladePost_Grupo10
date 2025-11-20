@@ -64,7 +64,7 @@ fun AppTheme(
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
-            // Nota: Aquí se usa el color dinámico, que podría sobreescribir el fondo fijo.
+            //Nota: Aquí se usa el color dinámico, que podría sobreescribir el fondo fijo.
             // Para asegurar el fondo fijo, considera desactivar dynamicColor si es clave.
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }

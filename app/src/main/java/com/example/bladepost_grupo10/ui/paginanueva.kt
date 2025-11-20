@@ -170,7 +170,7 @@ fun DetailScreen(navController: NavHostController, categoryId: Int?) {
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.Start
         ) {
-            // --- 1. SECCIÓN PRINCIPAL ---
+            //--- 1. SECCIÓN PRINCIPAL ---
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = " $categoryName",

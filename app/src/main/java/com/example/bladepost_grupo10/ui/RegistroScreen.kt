@@ -102,7 +102,7 @@ fun RegistroScreen(navController: NavHostController){
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        //Campo para el nombre completo
+        // Campo para el nombre completo
         OutlinedTextField(
             value = nombre,
             onValueChange = {nombre = it; isNameError = false},

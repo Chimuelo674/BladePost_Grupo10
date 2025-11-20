@@ -195,7 +195,7 @@ fun PerfilScreen(navController: NavHostController){
                 Text("Cerrar Sesión")
             }
 
-            // 🚀 LLAMADA AL DIÁLOGO CON PERSISTENCIA
+            //🚀 LLAMADA AL DIÁLOGO CON PERSISTENCIA
             if(showImagePickerDialog){
                 ImagePickerDialog(
                     onDismissRequest = {showImagePickerDialog = false},
@@ -211,7 +211,7 @@ fun PerfilScreen(navController: NavHostController){
 }
 
 // ----------------------------------------------------------------------
-// ImagePickerDialog - DEFINIDO GLOBALMENTE PARA QUE POSTFORMSCREEN PUEDA USARLO
+//ImagePickerDialog - DEFINIDO GLOBALMENTE PARA QUE POSTFORMSCREEN PUEDA USARLO
 // ----------------------------------------------------------------------
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable

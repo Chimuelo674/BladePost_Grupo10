@@ -46,7 +46,7 @@ fun PostFormScreen(navController: NavHostController) {
         }
     ) { paddingValues ->
 
-        // 🚀 LLAMADA AL DIÁLOGO
+        //🚀 LLAMADA AL DIÁLOGO
         if (showImagePickerDialog) {
             // Se usa el ImagePickerDialog definido en PerfilScreen.kt
             ImagePickerDialog(

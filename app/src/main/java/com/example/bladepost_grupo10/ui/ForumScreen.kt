@@ -33,7 +33,7 @@ data class ForumPost(
     val imageUri: Uri? = null
 )
 
-// Datos de prueba para simular posts
+//Datos de prueba para simular posts
 val dummyPosts = listOf(
     ForumPost(1, "Ana_Tec", "Problema con Compose", "Mi Composable no se recompone cuando cambio el estado. ¿Alguna idea?", imageUri = null),
     ForumPost(2, "BladeFan10", "Error en Kotlin", "Necesito ayuda con una excepción que obtengo al desestructurar en mi bucle for.", imageUri = null),

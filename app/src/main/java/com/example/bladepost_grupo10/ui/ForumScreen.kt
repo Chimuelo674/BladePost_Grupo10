@@ -9,34 +9,36 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf // ✅ IMPORTACIÓN CLAVE
+import androidx.compose.runtime.snapshots.SnapshotStateList // ✅ IMPORTACIÓN CLAVE
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.bladepost_grupo10.Screens
-import com.example.bladepost_grupo10.R // Necesario para acceder a recursos como drawables
+import com.example.bladepost_grupo10.R
+import androidx.compose.foundation.layout.PaddingValues
 
-// 1. MODELO DE DATOS PARA EL POST - ✅ Corregido y Final
+// 1. MODELO DE DATOS PARA EL POST (Mantenido aquí)
 data class ForumPost(
     val id: Int,
     val userName: String,
     val title: String,
     val question: String,
-    // ✅ PROPIEDADES AGREGADAS
-    val imageResId: Int? = null, // Puede ser nula si el post no tiene imagen
-    val commentCount: Int = 0    // Contador de comentarios
+    val imageResId: Int? = null,
+    val commentCount: Int = 0
 )
 
-// Datos de prueba para simular posts - ✅ Actualizados
-val dummyPosts = listOf(
+// Datos de prueba iniciales (Ahora son la fuente del estado mutable)
+private val initialDummyPosts = listOf(
     // Post 1: CON IMAGEN
     ForumPost(
         id = 1,
         userName = "Ana_Tec",
         title = "Problema con Compose: ¿Recomposición infinita?",
         question = "Mi Composable no se recompone cuando cambio el estado. ¿Alguna idea?",
-        imageResId = R.drawable.logo_nuevo, // 👈 USAR TU IMAGEN DE PREVIEW AQUÍ
+        imageResId = R.drawable.logo_nuevo,
         commentCount = 12
     ),
     // Post 2: SIN IMAGEN
@@ -45,7 +47,7 @@ val dummyPosts = listOf(
         userName = "BladeFan10",
         title = "Error en Kotlin: Uso incorrecto de 'when'",
         question = "Necesito ayuda con una excepción que obtengo al desestructurar en mi bucle for.",
-        imageResId = null, // 👈 SIN IMAGEN
+        imageResId = null,
         commentCount = 5
     ),
     // Post 3: CON IMAGEN
@@ -54,7 +56,7 @@ val dummyPosts = listOf(
         userName = "DeveloperX",
         title = "¿Cómo paso argumentos entre pantallas de Compose Navigation?",
         question = "Cómo paso argumentos complejos entre pantallas de Compose Navigation? Hay alguna alternativa a NavType?",
-        imageResId = R.drawable.logo_nuevo, // 👈 USAR TU IMAGEN DE PREVIEW AQUÍ
+        imageResId = R.drawable.logo_nuevo,
         commentCount = 21
     ),
     // Post 4: SIN IMAGEN
@@ -63,7 +65,7 @@ val dummyPosts = listOf(
         userName = "UsuarioRandom",
         title = "Duda sobre el sistema de puntos de experiencia (XP)",
         question = "Hay un bug en el contador de XP después de publicar un post. ¿Alguien más lo ha notado?",
-        imageResId = null, // 👈 SIN IMAGEN
+        imageResId = null,
         commentCount = 3
     ),
     // Más posts
@@ -71,8 +73,23 @@ val dummyPosts = listOf(
     ForumPost(6, "TheSniper", "Estrategias de Arena", "Posiciones y ángulos para usar la resistencia de forma efectiva.", commentCount = 8)
 )
 
+// ✅ ESTADO GLOBAL Y REACTIVO DE POSTS (Reemplaza a val dummyPosts)
+val forumPostsState: SnapshotStateList<ForumPost> = mutableStateListOf<ForumPost>().apply {
+    addAll(initialDummyPosts)
+}
 
-// 2. COMPONENTE ForumPostCard (Si existe, para que el post tenga imagen cuando se muestre)
+// ✅ FUNCIÓN GLOBAL PARA AÑADIR POSTS (Usada por PostFormScreen.kt)
+fun addPost(newPost: ForumPost) {
+    forumPostsState.add(0, newPost) // Añadir al inicio para que aparezca primero
+}
+
+// ✅ FUNCIÓN GLOBAL PARA GENERAR ID (Usada por PostFormScreen.kt)
+fun getNextPostId(): Int {
+    return (forumPostsState.maxByOrNull { it.id }?.id ?: 0) + 1
+}
+
+
+// 2. COMPONENTE ForumPostCard (Sigue igual)
 
 @Composable
 fun ForumPostCard(post: ForumPost, onPostClick: (ForumPost) -> Unit) {
@@ -117,11 +134,16 @@ fun ForumScreen(navController: NavHostController) {
                 }
             )
         },
+
+        // ✅ Botón flotante para navegar (Se mantiene la corrección de ruta anterior)
         floatingActionButton = {
-            FloatingActionButton(onClick = { /* Navegar a la pantalla de nuevo post */ }) {
+            FloatingActionButton(
+                onClick = { navController.navigate(Screens.POST_FORM_SCREEN) } // Asumiendo POST_FORM_SCREEN
+            ) {
                 Icon(Icons.Filled.Add, contentDescription = "Nuevo Post")
             }
         }
+
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -139,8 +161,8 @@ fun ForumScreen(navController: NavHostController) {
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
             }
-            items(dummyPosts) { post ->
-                // NOTA: Usamos ForumPostCard, pero podrías usar la vista detallada que tenías si era más compleja.
+            // ✅ CORRECCIÓN CLAVE: Ahora usa el estado mutable
+            items(forumPostsState) { post ->
                 ForumPostCard(post = post) { clickedPost ->
                     // Navegar a la pantalla de detalle del post (si existe)
                     // navController.navigate(Screens.POST_DETAIL + "/${clickedPost.id}")

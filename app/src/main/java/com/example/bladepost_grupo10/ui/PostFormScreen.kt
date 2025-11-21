@@ -18,6 +18,11 @@ import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import com.example.bladepost_grupo10.R // Necesario para R.drawable.logo_nuevo
+// ✅ NUEVAS IMPORTACIONES: Acceso a las funciones de ForumScreen.kt
+import com.example.bladepost_grupo10.ui.ForumPost
+import com.example.bladepost_grupo10.ui.addPost
+import com.example.bladepost_grupo10.ui.getNextPostId
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,9 +51,10 @@ fun PostFormScreen(navController: NavHostController) {
         }
     ) { paddingValues ->
 
-        //🚀 LLAMADA AL DIÁLOGO
+        //🚀 LLAMADA AL DIÁLOGO (asume que ImagePickerDialog existe en otro archivo)
         if (showImagePickerDialog) {
             // Se usa el ImagePickerDialog definido en PerfilScreen.kt
+            // **NOTA: Este Composable ImagePickerDialog debe existir en tu proyecto.**
             ImagePickerDialog(
                 onDismissRequest = { showImagePickerDialog = false },
                 onImageSelected = { uri ->
@@ -131,10 +137,21 @@ fun PostFormScreen(navController: NavHostController) {
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
+                // ✅ LÓGICA CORREGIDA: Crear y guardar el post en el estado global
                 onClick = {
-                    // Lógica para enviar la pregunta
+                    val newPost = ForumPost(
+                        id = getNextPostId(), // Obtiene el ID
+                        userName = currentUserName,
+                        title = titleText,
+                        question = questionText,
+                        imageResId = if (attachedImageUri != null) R.drawable.logo_nuevo else null,
+                        commentCount = 0
+                    )
+
+                    addPost(newPost) // ¡Actualiza la lista reactiva!
+
                     println("Pregunta enviada: Título='${titleText}' por el usuario '${currentUserName}', Foto adjunta: ${attachedImageUri != null}")
-                    navController.popBackStack()
+                    navController.popBackStack() // Vuelve a ForumScreen, que se recompondrá
                 },
                 modifier = Modifier.fillMaxWidth().height(50.dp),
                 enabled = titleText.isNotBlank() && questionText.isNotBlank()

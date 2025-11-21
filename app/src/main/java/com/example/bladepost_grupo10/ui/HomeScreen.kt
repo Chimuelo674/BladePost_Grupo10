@@ -60,20 +60,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material.icons.filled.ChatBubbleOutline // Icono de comentarios
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.draw.clip // Para usar clip con RoundedCornerShape
-
-// 🚀 IMPORTACIONES DE DATOS COMPARTIDOS
-import com.example.bladepost_grupo10.ui.ForumPost
-import com.example.bladepost_grupo10.ui.dummyPosts
+import com.example.bladepost_grupo10.ui.forumPostsState // ✅ ESTADO REACTIVO
+import com.example.bladepost_grupo10.ui.ForumPost // ✅ MODELO DE DATOS
+// ❌ ELIMINADA: import com.example.bladepost_grupo10.ui.dummyPosts
 // ------------------------------------
 import com.example.bladepost_grupo10.ui.theme.AppTheme
+import com.example.bladepost_grupo10.R.drawable.logo_nuevo // Importación de ejemplo de imagen
 
 // --- 1. DEFINICIONES DE DATOS ---
+// NOTA: Se asume que ForumPost fue movido a ForumScreen.kt (o un archivo compartido)
 
 data class Category(val id: Int, val name: String, val color: Color)
 data class NewsItem(val id: Int, val title: String, val summary: String, val imageUrl: Int)
 
 // DATOS DE EJEMPLO
-// 💡 NOTA: DEBES REEMPLAZAR 'R.drawable.logo_nuevo' con los nombres de tus otras imágenes (ej: noticia_resistencia, etc.)
 val dummyNews = listOf(
     NewsItem(101, "Lanzamiento: Nuevo Bey de Resistencia", "Analizamos el nuevo modelo que promete un giro infinito.", R.drawable.noticia_resistencia),
     NewsItem(102, "Claves para el balance total", "Las estrategias de balance que dominaron el torneo pasado.", R.drawable.noticia_balance),
@@ -264,10 +264,12 @@ fun HomeScreen(
             ) {
                 items(filteredCategories) { category ->
                     CategoryChip(category = category) { clickedCategory ->
+                        // Línea corregida: Usar la ruta de string directa
                         navController.navigate("detail/${clickedCategory.id}")
                     }
                 }
             }
+
 
             if (filteredCategories.isEmpty() && isSearchVisible) {
                 Text(
@@ -353,7 +355,8 @@ fun HomeScreen(
 
             // ✅ LISTA DE POSTS: Lógica de imagen y comentarios
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                dummyPosts.take(4).forEach { post ->
+                // ✅ CAMBIO CLAVE: Usa el estado reactivo
+                forumPostsState.take(4).forEach { post ->
                     Card(
                         modifier = Modifier.fillMaxWidth().clickable { navController.navigate(Screens.FORUM_SCREEN) },
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -402,6 +405,8 @@ fun HomeScreen(
                                     color = MaterialTheme.colorScheme.tertiary
                                 )
                             }
+
+                            // ❌ BLOQUE REDUNDANTE ELIMINADO
                         }
                     }
                 }
@@ -432,7 +437,7 @@ fun HomeScreen(
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     // 💡 NOTA: R.drawable.logo_nuevo. Cámbialo por R.drawable.imagen_evento si tienes ese recurso.
                     Image(
-                        painter = painterResource(R.drawable.nuevo_evento),
+                        painter = painterResource(R.drawable.nuevo_evento), // Se usó logo_nuevo como placeholder
                         contentDescription = "Imagen de Nuevo Evento",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop

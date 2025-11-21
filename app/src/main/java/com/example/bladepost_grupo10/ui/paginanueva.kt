@@ -188,13 +188,6 @@ fun DetailScreen(navController: NavHostController, categoryId: Int?) {
 
             // --- 2. CONTENIDO DINÁMICO ---
             Spacer(modifier = Modifier.height(24.dp))
-            Divider()
-            Text(
-                text = "Ejemplos Visuales de Beyblades",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
             Spacer(modifier = Modifier.height(8.dp))
 
             // 🚨 Búsqueda dinámica del contenido visual basado en el categoryId

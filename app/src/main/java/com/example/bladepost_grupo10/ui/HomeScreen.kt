@@ -57,22 +57,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.material.icons.filled.ChatBubbleOutline // Icono de comentarios
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.draw.clip // Para usar clip con RoundedCornerShape
 
-// 🚀 IMPORTACIONES DE DATOS COMPARTIDOS (Asegúrate de que ForumPost y dummyPosts estén definidos en ForumScreen.kt)
+// 🚀 IMPORTACIONES DE DATOS COMPARTIDOS
 import com.example.bladepost_grupo10.ui.ForumPost
-import com.example.bladepost_grupo10.ui.dummyPosts // <--- CORRECCIÓN CLAVE
+import com.example.bladepost_grupo10.ui.dummyPosts
 // ------------------------------------
 import com.example.bladepost_grupo10.ui.theme.AppTheme
 
-// --- 1. DEFINICIONES DE DATOS (Solo las necesarias) ---
+// --- 1. DEFINICIONES DE DATOS ---
 
 data class Category(val id: Int, val name: String, val color: Color)
 data class NewsItem(val id: Int, val title: String, val summary: String, val imageUrl: Int)
 
 // DATOS DE EJEMPLO
+// 💡 NOTA: DEBES REEMPLAZAR 'R.drawable.logo_nuevo' con los nombres de tus otras imágenes (ej: noticia_resistencia, etc.)
 val dummyNews = listOf(
     NewsItem(101, "Lanzamiento: Nuevo Bey de Resistencia", "Analizamos el nuevo modelo que promete un giro infinito.", R.drawable.noticia_resistencia),
-    NewsItem(102, "Claves del Campeonato Mundial", "Las estrategias de balance que dominaron el torneo pasado.", R.drawable.noticia_balance),
+    NewsItem(102, "Claves para el balance total", "Las estrategias de balance que dominaron el torneo pasado.", R.drawable.noticia_balance),
     NewsItem(103, "Customización Prohibida", "Los drivers que la organización vetó por ser demasiado poderosos.", R.drawable.noticia_prohibida)
 )
 
@@ -128,7 +132,6 @@ fun HomeScreen(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            // ... (TopAppBar lógica de búsqueda y navegación) ...
             if (isSearchVisible) {
                 // --- BARRA DE BÚSQUEDA ACTIVA ---
                 TopAppBar(
@@ -313,6 +316,7 @@ fun HomeScreen(
                         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                     ) {
                         Box(modifier = Modifier.fillMaxSize()) {
+                            // 💡 NOTA: newsItem.imageUrl usa R.drawable.logo_nuevo. Cámbialo en dummyNews para ver diferentes imágenes.
                             Image(
                                 painter = painterResource(id = newsItem.imageUrl),
                                 contentDescription = newsItem.title,
@@ -347,15 +351,15 @@ fun HomeScreen(
                 color = MaterialTheme.colorScheme.onBackground
             )
 
-            // ✅ LISTA DE POSTS: Muestra los 4 más recientes de la lista global
+            // ✅ LISTA DE POSTS: Lógica de imagen y comentarios
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                // Iteramos sobre los 4 posts más recientes
-                dummyPosts.take(4).forEach { post -> // <--- CORRECCIÓN CLAVE: Usando dummyPosts
+                dummyPosts.take(4).forEach { post ->
                     Card(
                         modifier = Modifier.fillMaxWidth().clickable { navController.navigate(Screens.FORUM_SCREEN) },
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {
+                            // Título y Usuario
                             Text(
                                 text = post.title,
                                 style = MaterialTheme.typography.titleSmall,
@@ -367,6 +371,37 @@ fun HomeScreen(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.primary
                             )
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            // ✅ IMAGEN (Se muestra SOLO si post.imageResId no es nulo)
+                            if (post.imageResId != null) {
+                                Image(
+                                    painter = painterResource(id = post.imageResId),
+                                    contentDescription = "Imagen de la pregunta",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(100.dp)
+                                        .clip(RoundedCornerShape(8.dp))
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+
+                            // ✅ CONTEO DE COMENTARIOS
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    Icons.Default.ChatBubbleOutline,
+                                    contentDescription = "Comentarios",
+                                    modifier = Modifier.size(16.dp),
+                                    tint = MaterialTheme.colorScheme.tertiary
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "${post.commentCount} Comentarios",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.tertiary
+                                )
+                            }
                         }
                     }
                 }
@@ -380,14 +415,14 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // SECCIÓN: Eventos de la Comunidad (IMAGEN CORREGIDA)
+            // SECCIÓN: Eventos de la Comunidad
             Text(
                 text = "🔥 Eventos de la Comunidad",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground
             )
 
-            //✅ SECCIÓN DE IMAGEN DE EVENTO CORREGIDA
+            //✅ SECCIÓN DE IMAGEN DE EVENTO
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -395,6 +430,7 @@ fun HomeScreen(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    // 💡 NOTA: R.drawable.logo_nuevo. Cámbialo por R.drawable.imagen_evento si tienes ese recurso.
                     Image(
                         painter = painterResource(R.drawable.nuevo_evento),
                         contentDescription = "Imagen de Nuevo Evento",

@@ -15,34 +15,93 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.bladepost_grupo10.Screens
-// 🚀 IMPORTACIONES NECESARIAS PARA MOSTRAR LA IMAGEN
-import android.net.Uri
-import androidx.compose.foundation.Image
-import coil.compose.rememberAsyncImagePainter
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-// ----------------------------------------------------
+import com.example.bladepost_grupo10.R // Necesario para acceder a recursos como drawables
 
-// 1. MODELO DE DATOS PARA EL POST - AHORA INCLUYE imageUri
+// 1. MODELO DE DATOS PARA EL POST - ✅ Corregido y Final
 data class ForumPost(
     val id: Int,
     val userName: String,
     val title: String,
     val question: String,
-    // 🚀 NUEVO CAMPO PARA LA FOTO (Puede ser nulo si no se adjuntó)
-    val imageUri: Uri? = null
+    // ✅ PROPIEDADES AGREGADAS
+    val imageResId: Int? = null, // Puede ser nula si el post no tiene imagen
+    val commentCount: Int = 0    // Contador de comentarios
 )
 
-//Datos de prueba para simular posts
+// Datos de prueba para simular posts - ✅ Actualizados
 val dummyPosts = listOf(
-    ForumPost(1, "Ana_Tec", "Problema con Compose", "Mi Composable no se recompone cuando cambio el estado. ¿Alguna idea?", imageUri = null),
-    ForumPost(2, "BladeFan10", "Error en Kotlin", "Necesito ayuda con una excepción que obtengo al desestructurar en mi bucle for.", imageUri = null),
-    ForumPost(3, "DeveloperX", "Duda de Navegación", "Cómo paso argumentos complejos entre pantallas de Compose Navigation? Hay alguna alternativa a NavType?", imageUri = null),
-    ForumPost(4, "CoderPro", "Performance en LazyColumn", "Tengo muchos elementos y la lista va lenta. ¿Consejos para optimizar?", imageUri = null),
-    ForumPost(5, "UserTester", "Pregunta de diseño UI", "Alguien sabe cómo hacer un efecto de parallax suave en Jetpack Compose?", imageUri = null),
+    // Post 1: CON IMAGEN
+    ForumPost(
+        id = 1,
+        userName = "Ana_Tec",
+        title = "Problema con Compose: ¿Recomposición infinita?",
+        question = "Mi Composable no se recompone cuando cambio el estado. ¿Alguna idea?",
+        imageResId = R.drawable.logo_nuevo, // 👈 USAR TU IMAGEN DE PREVIEW AQUÍ
+        commentCount = 12
+    ),
+    // Post 2: SIN IMAGEN
+    ForumPost(
+        id = 2,
+        userName = "BladeFan10",
+        title = "Error en Kotlin: Uso incorrecto de 'when'",
+        question = "Necesito ayuda con una excepción que obtengo al desestructurar en mi bucle for.",
+        imageResId = null, // 👈 SIN IMAGEN
+        commentCount = 5
+    ),
+    // Post 3: CON IMAGEN
+    ForumPost(
+        id = 3,
+        userName = "DeveloperX",
+        title = "¿Cómo paso argumentos entre pantallas de Compose Navigation?",
+        question = "Cómo paso argumentos complejos entre pantallas de Compose Navigation? Hay alguna alternativa a NavType?",
+        imageResId = R.drawable.logo_nuevo, // 👈 USAR TU IMAGEN DE PREVIEW AQUÍ
+        commentCount = 21
+    ),
+    // Post 4: SIN IMAGEN
+    ForumPost(
+        id = 4,
+        userName = "UsuarioRandom",
+        title = "Duda sobre el sistema de puntos de experiencia (XP)",
+        question = "Hay un bug en el contador de XP después de publicar un post. ¿Alguien más lo ha notado?",
+        imageResId = null, // 👈 SIN IMAGEN
+        commentCount = 3
+    ),
+    // Más posts
+    ForumPost(5, "BladerMaestro", "Mejores Drivers para el Ataque Feroz", "He probado 5 drivers, aquí mi ranking...", commentCount = 15),
+    ForumPost(6, "TheSniper", "Estrategias de Arena", "Posiciones y ángulos para usar la resistencia de forma efectiva.", commentCount = 8)
 )
 
-// --------------------------------------------------------------------------------------------------
+
+// 2. COMPONENTE ForumPostCard (Si existe, para que el post tenga imagen cuando se muestre)
+
+@Composable
+fun ForumPostCard(post: ForumPost, onPostClick: (ForumPost) -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onPostClick(post) }
+            .padding(vertical = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = post.title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Por: ${post.userName}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+}
+
+
+// 3. PANTALLA PRINCIPAL DEL FORO
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,96 +109,43 @@ fun ForumScreen(navController: NavHostController) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Blade Post: Foro de Preguntas") },
-                // Botón de Volver
+                title = { Text("Foro de Discusión") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
                     }
-                },
-                // Botón para crear nuevo post
-                actions = {
-                    IconButton(onClick = { navController.navigate(Screens.POST_FORM_SCREEN) }) {
-                        Icon(Icons.Filled.Add, contentDescription = "Crear Post")
-                    }
                 }
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = { /* Navegar a la pantalla de nuevo post */ }) {
+                Icon(Icons.Filled.Add, contentDescription = "Nuevo Post")
+            }
         }
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
-                .fillMaxSize()
                 .padding(paddingValues)
+                .fillMaxSize()
                 .padding(horizontal = 16.dp),
-            contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            contentPadding = PaddingValues(top = 8.dp, bottom = 80.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            item {
+                Text(
+                    text = "Todos los Temas",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+            }
             items(dummyPosts) { post ->
-                ForumPostCard(post = post, navController = navController)
+                // NOTA: Usamos ForumPostCard, pero podrías usar la vista detallada que tenías si era más compleja.
+                ForumPostCard(post = post) { clickedPost ->
+                    // Navegar a la pantalla de detalle del post (si existe)
+                    // navController.navigate(Screens.POST_DETAIL + "/${clickedPost.id}")
+                }
             }
-        }
-    }
-}
-
-// --------------------------------------------------------------------------------------------------
-
-@Composable
-fun ForumPostCard(post: ForumPost, navController: NavHostController) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { /* Navegar al detalle del post */ }
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            // MOSTRAR NOMBRE DE USUARIO
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Preguntado por: ${post.userName}",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.SemiBold
-                )
-                // Opcional: Mostrar ID o fecha aquí
-                Text(
-                    text = "#${post.id}",
-                    style = MaterialTheme.typography.labelSmall
-                )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Título de la Pregunta
-            Text(
-                text = post.title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-
-            // Cuerpo de la Pregunta (Snippet)
-            Text(
-                text = post.question.take(100) + if (post.question.length > 100) "..." else "",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            // 🚀 LÓGICA DE MOSTRAR IMAGEN ADJUNTA
-            post.imageUri?.let { uri ->
-                Spacer(modifier = Modifier.height(8.dp))
-                Image(
-                    painter = rememberAsyncImagePainter(model = uri),
-                    contentDescription = "Imagen adjunta al post",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(150.dp) // Altura fija para la vista previa
-                        .clip(MaterialTheme.shapes.small),
-                    contentScale = ContentScale.Crop
-                )
-            }
-            // ----------------------------------------------------
         }
     }
 }

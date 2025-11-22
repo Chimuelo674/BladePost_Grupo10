@@ -1,22 +1,38 @@
 package com.example.bladepost_grupo10.ui
 
+import android.net.Uri
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material3.*
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import com.example.bladepost_grupo10.R // Necesario para R.drawable.logo_nuevo
+// ✅ NUEVAS IMPORTACIONES: Acceso a las funciones de ForumScreen.kt
+import com.example.bladepost_grupo10.ui.ForumPost
+import com.example.bladepost_grupo10.ui.addPost
+import com.example.bladepost_grupo10.ui.getNextPostId
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PostFormScreen(navController: NavHostController) {
     var questionText by remember { mutableStateOf("") }
     var titleText by remember { mutableStateOf("") }
+
+    // 🚀 ESTADOS PARA LA FOTO
+    var attachedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var showImagePickerDialog by remember { mutableStateOf(false) }
 
     // HARDCODED USERNAME: Reemplazar con el nombre real del usuario logeado
     val currentUserName = "Usuario_Autenticado_123"
@@ -34,6 +50,20 @@ fun PostFormScreen(navController: NavHostController) {
             )
         }
     ) { paddingValues ->
+
+        //🚀 LLAMADA AL DIÁLOGO (asume que ImagePickerDialog existe en otro archivo)
+        if (showImagePickerDialog) {
+            // Se usa el ImagePickerDialog definido en PerfilScreen.kt
+            // **NOTA: Este Composable ImagePickerDialog debe existir en tu proyecto.**
+            ImagePickerDialog(
+                onDismissRequest = { showImagePickerDialog = false },
+                onImageSelected = { uri ->
+                    attachedImageUri = uri
+                    showImagePickerDialog = false
+                }
+            )
+        }
+
         Column(
             modifier = Modifier
                 .padding(paddingValues)
@@ -43,7 +73,6 @@ fun PostFormScreen(navController: NavHostController) {
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.Top)
         ) {
 
-            // 🚀 MUESTRA EL NOMBRE DEL USUARIO QUE ESTÁ PUBLICANDO
             Text(
                 text = "Publicando como: ${currentUserName}",
                 style = MaterialTheme.typography.titleSmall,
@@ -68,17 +97,61 @@ fun PostFormScreen(navController: NavHostController) {
                 label = { Text("Describe tu pregunta...") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
+                    .height(150.dp)
             )
+
+            // 🚀 BOTÓN Y VISTA PREVIA DE FOTO
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(
+                    onClick = { showImagePickerDialog = true },
+                    contentPadding = if (attachedImageUri != null) PaddingValues(8.dp) else ButtonDefaults.ContentPadding
+                ) {
+                    Icon(
+                        Icons.Filled.AddAPhoto,
+                        contentDescription = "Adjuntar Foto"
+                    )
+                    if (attachedImageUri == null) {
+                        Spacer(Modifier.width(8.dp))
+                        Text("Adjuntar Foto")
+                    }
+                }
+
+                Spacer(Modifier.width(16.dp))
+
+                if (attachedImageUri != null) {
+                    Image(
+                        painter = rememberAsyncImagePainter(model = attachedImageUri),
+                        contentDescription = "Imagen adjunta",
+                        modifier = Modifier
+                            .size(64.dp)
+                            .clip(MaterialTheme.shapes.small),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+            }
+
 
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
+                // ✅ LÓGICA CORREGIDA: Crear y guardar el post en el estado global
                 onClick = {
-                    // Lógica para enviar la pregunta
-                    println("Pregunta enviada: Título='${titleText}' por el usuario '${currentUserName}'")
-                    // 💡 LÓGICA FUTURA: Aquí enviarías {titleText, questionText, currentUserName} a tu servidor.
-                    navController.popBackStack()
+                    val newPost = ForumPost(
+                        id = getNextPostId(), // Obtiene el ID
+                        userName = currentUserName,
+                        title = titleText,
+                        question = questionText,
+                        imageResId = if (attachedImageUri != null) R.drawable.logo_nuevo else null,
+                        commentCount = 0
+                    )
+
+                    addPost(newPost) // ¡Actualiza la lista reactiva!
+
+                    println("Pregunta enviada: Título='${titleText}' por el usuario '${currentUserName}', Foto adjunta: ${attachedImageUri != null}")
+                    navController.popBackStack() // Vuelve a ForumScreen, que se recompondrá
                 },
                 modifier = Modifier.fillMaxWidth().height(50.dp),
                 enabled = titleText.isNotBlank() && questionText.isNotBlank()

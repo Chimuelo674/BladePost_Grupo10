@@ -7,7 +7,9 @@ import com.example.bladepost_grupo10.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -48,33 +50,29 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material.icons.filled.Close
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.bladepost_grupo10.Screens // 🚀 IMPORTACIÓN CLAVE AÑADIDA
+import com.example.bladepost_grupo10.Screens
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.ui.Alignment
-import androidx.compose.foundation.layout.IntrinsicSize // Importación necesaria
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.ui.draw.clip // Importación necesaria
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.material.icons.filled.ChatBubbleOutline // Icono de comentarios
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.draw.clip
+import com.example.bladepost_grupo10.ui.theme.AppTheme
 
-
-// --- 1. DEFINICIONES DE DATOS Y TEMA ---
+// --- 1. DEFINICIONES DE DATOS ---
+// NOTA: Se asume que ForumPost fue movido a ForumScreen.kt (o un archivo compartido)
 
 data class Category(val id: Int, val name: String, val color: Color)
-data class NewsItem(val id: Int, val title: String, val summary: String, val imageUrl: Int) // CLASE AÑADIDA
-data class ForumItem(val id: Int, val user: String, val comment: String, val categoryId: Int)
+data class NewsItem(val id: Int, val title: String, val summary: String, val imageUrl: Int)
 
-// DATOS DE EJEMPLO DE NOTICIAS (Para uso futuro si se usa NewsCard)
+// DATOS DE EJEMPLO
 val dummyNews = listOf(
     NewsItem(101, "Lanzamiento: Nuevo Bey de Resistencia", "Analizamos el nuevo modelo que promete un giro infinito.", R.drawable.noticia_resistencia),
-    NewsItem(102, "Claves del Campeonato Mundial", "Las estrategias de balance que dominaron el torneo pasado.", R.drawable.noticia_balance),
+    NewsItem(102, "Claves para el balance total", "Las estrategias de balance que dominaron el torneo pasado.", R.drawable.noticia_balance),
     NewsItem(103, "Customización Prohibida", "Los drivers que la organización vetó por ser demasiado poderosos.", R.drawable.noticia_prohibida)
-)
-
-val dummyForumItems = listOf(
-    ForumItem(201, "BladeMaestro", "¿Cómo consigo el Bey de Ataque Feroz?", 1),
-    ForumItem(202, "SpinKing", "Mi Bey de Defensa es imbatible, ¿algún consejo?", 2),
-    ForumItem(203, "CustomGod", "Necesito ideas para personalizar mi Bey de Resistencia.", 3),
-    ForumItem(204, "BalancePro", "Consejos para dominar el Beyblade de Balance Total.", 4)
 )
 
 val dummyCategories = listOf(
@@ -85,36 +83,7 @@ val dummyCategories = listOf(
     Category(5, "Customización", Color(0xFFBA55D3)),
 )
 
-private val DarkColorScheme = androidx.compose.material3.darkColorScheme(
-    primary = Color(0xFFBB86FC),
-    onPrimary = Color.Black,
-    surface = Color.Black,
-    onSurface = Color.White
-)
-
-private val LightColorScheme = androidx.compose.material3.lightColorScheme(
-    primary = Color(0xFF6200EE),
-    onPrimary = Color.White,
-    surface = Color.White,
-    onSurface = Color.Black
-)
-
-@Composable
-fun AppTheme(
-    darkTheme: Boolean,
-    content: @Composable () -> Unit
-) {
-    val colorScheme = when {
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
-
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = MaterialTheme.typography,
-        content = content
-    )
-}
+// --- Componibles de Soporte (CategoryChip) ---
 
 @Composable
 fun CategoryChip(category: Category, onCategoryClick: (Category) -> Unit) {
@@ -138,362 +107,374 @@ fun CategoryChip(category: Category, onCategoryClick: (Category) -> Unit) {
     }
 }
 
-// Nota: No se está usando la función NewsCard en el código que enviaste, solo las imágenes sueltas.
-
-@Composable
-fun ForumCard(item: ForumItem) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        shape = MaterialTheme.shapes.small,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(12.dp)
-        ) {
-            Text(
-                text = item.user,
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = item.comment,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Categoría: ${dummyCategories.find { it.id == item.categoryId }?.name ?: "N/A"}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-
 // --- 2. FUNCIÓN DE PANTALLA PRINCIPAL (HomeScreen) ---
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavHostController) {
-    // ESTADOS
-    var isDarkTheme by remember { mutableStateOf(false)}
+fun HomeScreen(
+    navController: NavHostController,
+    isDarkTheme: Boolean = false,
+    onThemeChange: (Boolean) -> Unit = {}
+) {
+    // --- ESTADOS LOCALES MÍNIMOS ---
     var isMenuExpanded by remember { mutableStateOf(false) }
     var selectedCategory by remember { mutableStateOf<Category?>(null) }
-
-    // ESTADOS DE BÚSQUEDA AÑADIDOS
     var isSearchVisible by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
 
+    val currentIsDarkTheme = isDarkTheme
 
-    AppTheme(darkTheme = isDarkTheme) {
-        Scaffold(
-            topBar = {
-
-                // LÓGICA CONDICIONAL: Mostrar TopAppBar normal O TopAppBar de búsqueda
-                if (isSearchVisible) {
-                    // --- BARRA DE BÚSQUEDA ACTIVA ---
-                    TopAppBar(
-                        title = {
-                            OutlinedTextField(
-                                value = searchQuery,
-                                onValueChange = { searchQuery = it },
-                                placeholder = { Text("Buscar categorías...") },
-                                // El TextField ocupa la mayor parte del espacio de Title
-                                modifier = Modifier.fillMaxWidth(0.8f)
-                            )
-                        },
-                        navigationIcon = {
-                            // Icono para volver atrás y cerrar la búsqueda
-                            IconButton(onClick = {
-                                isSearchVisible = false // Cierra la búsqueda
-                                searchQuery = ""        // Limpia el texto
-                            }) {
-                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
-                            }
-                        },
-                        actions = {
-                            // Icono para limpiar el texto dentro del modo búsqueda
-                            if (searchQuery.isNotEmpty()) {
-                                IconButton(onClick = { searchQuery = "" }) {
-                                    Icon(Icons.Filled.Close, contentDescription = "Limpiar")
-                                }
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            if (isSearchVisible) {
+                // --- BARRA DE BÚSQUEDA ACTIVA ---
+                TopAppBar(
+                    title = {
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            placeholder = { Text("Buscar categorías...") },
+                            modifier = Modifier.fillMaxWidth(0.8f),
+                            textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface)
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = {
+                            isSearchVisible = false
+                            searchQuery = ""
+                        }) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                        }
+                    },
+                    actions = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { searchQuery = "" }) {
+                                Icon(Icons.Filled.Close, contentDescription = "Limpiar")
                             }
                         }
-                    )
+                    }
+                )
 
-                } else {
-                    // --- TOPAPPBAR NORMAL ---
-                    TopAppBar(
-                        title = {
-                            Text("Blade Post" + (selectedCategory?.let { " - ${it.name}" } ?: ""),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.clickable {
-                                    selectedCategory = null
-                                }
+            } else {
+                // --- TOPAPPBAR NORMAL ---
+                TopAppBar(
+                    title = {
+                        Text("Blade Post" + (selectedCategory?.let { " - ${it.name}" } ?: ""),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.clickable {
+                                selectedCategory = null
+                            }
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { isMenuExpanded = true }) {
+                            Icon(
+                                imageVector = Icons.Filled.Menu,
+                                contentDescription = "Categoría",
+                                tint = MaterialTheme.colorScheme.onSurface
                             )
-                        },
-                        navigationIcon = {
-                            // Menú Desplegable de Categorías (Icono de Hamburguesa)
-                            IconButton(onClick = { isMenuExpanded = true }) {
-                                Icon(
-                                    imageVector = Icons.Filled.Menu,
-                                    contentDescription = "Categoría",
-                                    tint = MaterialTheme.colorScheme.onSurface
+                        }
+                        DropdownMenu(
+                            expanded = isMenuExpanded,
+                            onDismissRequest = { isMenuExpanded = false }
+                        ){
+                            dummyCategories.forEach { category ->
+                                DropdownMenuItem(
+                                    text = { Text(category.name, color = MaterialTheme.colorScheme.onSurface) },
+                                    onClick = {
+                                        selectedCategory = category
+                                        isMenuExpanded = false
+                                        navController.navigate("detail/${category.id}")
+                                    }
                                 )
                             }
-                            DropdownMenu(
-                                expanded = isMenuExpanded,
-                                onDismissRequest = { isMenuExpanded = false }
-                            ){
-                                dummyCategories.forEach { category ->
-                                    DropdownMenuItem(
-                                        text = { Text(category.name, color = MaterialTheme.colorScheme.onSurface) },
-                                        onClick = {
-                                            selectedCategory = category
-                                            isMenuExpanded = false
-                                            navController.navigate("detail/${category.id}")
-                                        }
-                                    )
-                                }
+                        }
+                    },
+                    actions = {
+                        // SWITCH DE TEMA
+                        Switch(
+                            checked = currentIsDarkTheme,
+                            onCheckedChange = onThemeChange
+                        )
+                        Text(
+                            text = if (currentIsDarkTheme) "Oscuro" else "Claro",
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(end = 8.dp),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        IconButton(onClick = { navController.navigate(Screens.PROFILE_SCREEN) }) {
+                            Icon(
+                                imageVector = Icons.Filled.Person,
+                                contentDescription = "Ir a Perfil",
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                        IconButton(onClick = { isSearchVisible = true }) {
+                            Icon(
+                                imageVector = Icons.Filled.Search,
+                                contentDescription = "Activar Búsqueda",
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                )
+            }
+        }
+    ){ innerPadding ->
+
+        // LÓGICA DE FILTRADO
+        val filteredCategories = dummyCategories.filter {
+            if (searchQuery.isBlank()) {
+                true
+            } else {
+                it.name.contains(searchQuery, ignoreCase = true)
+            }
+        }
+
+        // CONTENIDO PRINCIPAL
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(horizontal = 16.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            Text(
+                text = "¡Bienvenido!",
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Text(
+                text = "Explora Categorías",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(top = 8.dp),
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            LazyRow(
+                modifier = Modifier.fillMaxWidth().height(50.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                items(filteredCategories) { category ->
+                    CategoryChip(category = category) { clickedCategory ->
+                        // Línea corregida: Usar la ruta de string directa
+                        navController.navigate("detail/${clickedCategory.id}")
+                    }
+                }
+            }
+
+
+            if (filteredCategories.isEmpty() && isSearchVisible) {
+                Text(
+                    text = "No se encontraron categorías para \"$searchQuery\".",
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(vertical = 16.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // LOGO (CON TAMAÑO AUMENTADO A 160.dp)
+            Image(
+                painter = painterResource(id = R.drawable.logo_nuevo),
+                contentDescription = "Logo App",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(160.dp)
+                    .padding(vertical = 16.dp),
+                contentScale = ContentScale.Fit,
+                alignment = Alignment.Center
+            )
+
+            // * ----------------------------------------------------
+            // * --- CARRUSEL HORIZONTAL DE NOTICIAS (LazyRow) ---
+            // * ----------------------------------------------------
+
+            Text(
+                text = "🔥 Noticias Destacadas",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(top = 8.dp),
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            LazyRow(
+                modifier = Modifier.fillMaxWidth().height(200.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(horizontal = 0.dp)
+            ) {
+                items(dummyNews) { newsItem ->
+                    Card(
+                        modifier = Modifier
+                            .width(300.dp)
+                            .fillMaxHeight(),
+                        shape = RoundedCornerShape(12.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    ) {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            // 💡 NOTA: newsItem.imageUrl usa R.drawable.logo_nuevo. Cámbialo en dummyNews para ver diferentes imágenes.
+                            Image(
+                                painter = painterResource(id = newsItem.imageUrl),
+                                contentDescription = newsItem.title,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                            Column(
+                                modifier = Modifier
+                                    .align(Alignment.BottomStart)
+                                    .background(Color.Black.copy(alpha = 0.6f))
+                                    .padding(8.dp)
+                                    .fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = newsItem.title,
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.titleSmall
+                                )
                             }
-                        },
-                        actions = {
-                            // Switch de Tema
-                            Switch(
-                                checked = isDarkTheme,
-                                onCheckedChange = { isDarkTheme = it }
+                        }
+                    }
+                }
+            }
+            // * --------------------------------------------------
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // SECCIÓN: Últimos del Foro
+            Text(
+                text = "Últimas 4 Preguntas del Foro",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            // ✅ LISTA DE POSTS: Lógica de imagen y comentarios
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                // ✅ CAMBIO CLAVE: Usa el estado reactivo
+                forumPostsState.take(4).forEach { post ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth().clickable { navController.navigate(Screens.FORUM_SCREEN) },
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            // Título y Usuario
+                            Text(
+                                text = post.title,
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Text(
-                                text = if (isDarkTheme) "Oscuro" else "Claro",
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.padding(end = 8.dp),
-                                color = MaterialTheme.colorScheme.onSurface
+                                text = "Por: ${post.userName}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.primary
                             )
-                            IconButton(onClick = { navController.navigate(Screens.PROFILE_SCREEN) }) {
-                                Icon(
-                                    imageVector = Icons.Filled.Person, // Icono de persona
-                                    contentDescription = "Ir a Perfil",
-                                    tint = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                            // BOTÓN QUE ACTIVA EL MODO BÚSQUEDA
-                            IconButton(onClick = { isSearchVisible = true }) {
-                                Icon(
-                                    imageVector = Icons.Filled.Search,
-                                    contentDescription = "Activar Búsqueda",
-                                    tint = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                        }
-                    )
-                } // Fin de la lógica condicional de TopAppBar
-            }
-        ){ innerPadding ->
+                            Spacer(modifier = Modifier.height(8.dp))
 
-            // LÓGICA DE FILTRADO APLICADA AL CONTENIDO PRINCIPAL
-            val filteredCategories = dummyCategories.filter {
-                if (searchQuery.isBlank()) {
-                    true
-                } else {
-                    it.name.contains(searchQuery, ignoreCase = true)
+                            // ✅ IMAGEN (Se muestra SOLO si post.imageResId no es nulo)
+                            if (post.imageResId != null) {
+                                Image(
+                                    painter = painterResource(id = post.imageResId),
+                                    contentDescription = "Imagen de la pregunta",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(100.dp)
+                                        .clip(RoundedCornerShape(8.dp))
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+
+                            // ✅ CONTEO DE COMENTARIOS
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    Icons.Default.ChatBubbleOutline,
+                                    contentDescription = "Comentarios",
+                                    modifier = Modifier.size(16.dp),
+                                    tint = MaterialTheme.colorScheme.tertiary
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "${post.commentCount} Comentarios",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.tertiary
+                                )
+                            }
+
+                            // ❌ BLOQUE REDUNDANTE ELIMINADO
+                        }
+                    }
                 }
             }
 
-            // CONTENIDO PRINCIPAL
-            Column(
+            Button(onClick = {
+                navController.navigate(Screens.FORUM_SCREEN)
+            }) {
+                Text("Ir al Foro")
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // SECCIÓN: Eventos de la Comunidad
+            Text(
+                text = "🔥 Eventos de la Comunidad",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            //✅ SECCIÓN DE IMAGEN DE EVENTO
+            Card(
                 modifier = Modifier
-                    .padding(innerPadding)
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.surface)
-                    .padding(horizontal = 16.dp)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
+                    .fillMaxWidth()
+                    .height(180.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
-                Text(
-                    text = "¡Bienvenido!",
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = "Explora Categorías",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(top = 8.dp),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth().height(50.dp), // Ajuste para que LazyRow funcione dentro de Column scrollable
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    // USAR LA LISTA FILTRADA EN EL LAZYROW
-                    items(filteredCategories) { category ->
-                        CategoryChip(category = category) { clickedCategory ->
-                            // Lógica de Navegación
-                            navController.navigate("detail/${clickedCategory.id}")
-                        }
-                    }
-                }
-
-
-
-
-                // Muestra un mensaje si no hay resultados y la búsqueda está activa
-                if (filteredCategories.isEmpty() && isSearchVisible) {
-                    Text(
-                        text = "No se encontraron categorías para \"$searchQuery\".",
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(vertical = 16.dp)
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    // 💡 NOTA: R.drawable.logo_nuevo. Cámbialo por R.drawable.imagen_evento si tienes ese recurso.
+                    Image(
+                        painter = painterResource(R.drawable.nuevo_evento), // Se usó logo_nuevo como placeholder
+                        contentDescription = "Imagen de Nuevo Evento",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
                     )
                 }
+            }
 
-                Spacer(modifier = Modifier.height(10.dp))
+            // Texto explicativo opcional
+            Text(
+                text = "¡Participa en el torneo semanal y gana piezas raras!",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(20.dp))
 
-                Button(onClick = {
-                    navController.navigate(Screens.FORUM_SCREEN)
-                }) {
-                    Text("Crear Pregunta")
-                }
-
-                //* --- Bloque de Imágenes de Noticias (Sueltas) ---
-                Image(
-                    painter = painterResource(id = R.drawable.noticia_resistencia),
-                    contentDescription = "resistencia",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(150.dp),
-                    contentScale = ContentScale.Fit
-                )
-                Image(
-                    painter = painterResource(id = R.drawable.noticia_prohibida),
-                    contentDescription = "Prohibido",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(150.dp),
-                    contentScale = ContentScale.Fit
-                )
-                Image(
-                    painter = painterResource(id = R.drawable.noticia_balance),
-                    contentDescription = "balance",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(150.dp),
-                    contentScale = ContentScale.Fit
-                )
-
-                Text(
-                    text = "Últimas Noticias",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(top = 8.dp),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    dummyNews.forEach { newsItem ->
-                        Image(
-                            painter = painterResource(id = newsItem.imageUrl),
-                            contentDescription = newsItem.title,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(150.dp)
-                                .clip(RoundedCornerShape(8.dp)),
-                            contentScale = ContentScale.Crop
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(20.dp))
-
-
-
-                // --- Fin de Bloque de Imágenes de Noticias ---
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                // SECCIÓN: Últimos del Foro
-                Text(
-                    text = "Últimos Comentarios del Foro",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                // LISTA ESTÁTICA DE COMENTARIOS/PREGUNTAS
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    dummyForumItems.forEach { forumItem ->
-                        ForumCard(item = forumItem)
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                // SECCIÓN: Eventos de la Comunidad
-                Text(
-                    text = "🔥 Eventos de la Comunidad",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                // Placeholder para la imagen "nuevo_evento" que no está definida
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFA07A)) // Color de placeholder
-                ) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("IMAGEN DE EVENTO AQUÍ", color = Color.Black)
-                    }
-                }
-
-                // Texto explicativo opcional
-                Text(
-                    text = "¡Participa en el torneo semanal y gana piezas raras!",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(20.dp))
-
-                // SECCIÓN: Top 5 Bladers
-                Text(
-                    text = "🥇 Top 5 Bladers de la Semana",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.padding(top = 8.dp)
-                ) {
-                    items(listOf("Tyson", "Kai", "Ray", "Max", "Daichi")) { user ->
-                        Card(
-                            modifier = Modifier.width(100.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color(0xFFF0E68C))
+            // SECCIÓN: Top 5 Bladers
+            Text(
+                text = "🥇 Top 5 Bladers de la Semana",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.padding(top = 8.dp)
+            ) {
+                items(listOf("Tyson", "Kai", "Ray", "Max", "Daichi")) { user ->
+                    Card(
+                        modifier = Modifier.width(100.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF0E68C))
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(8.dp).fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Column(
-                                modifier = Modifier.padding(8.dp).fillMaxSize(),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Icon(Icons.Filled.Person, contentDescription = "Usuario", tint = Color.Black)
-                                Text(user, style = MaterialTheme.typography.bodyLarge, color = Color.Black)
-                            }
+                            Icon(Icons.Filled.Person, contentDescription = "Usuario", tint = Color.Black)
+                            Text(user, style = MaterialTheme.typography.bodyLarge, color = Color.Black)
                         }
                     }
                 }
-
-                Spacer(modifier = Modifier.height(20.dp)) // Espacio antes del logo
-
-                // AJUSTE DEL TAMAÑO Y POSICIONAMIENTO DEL LOGO (Al final de la pantalla)
-                Image(
-                    painter = painterResource(id = R.drawable.logo),
-                    contentDescription = "Logo App",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(100.dp), // Tamaño más pequeño para el logo de cierre
-                    contentScale = ContentScale.Fit
-                )
-                Spacer(modifier = Modifier.height(24.dp)) // Espacio final
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
@@ -505,5 +486,7 @@ fun HomeScreen(navController: NavHostController) {
 @Composable
 fun HomeScreenPreview(){
     val mockNavController = rememberNavController()
-    HomeScreen(navController = mockNavController)
+    AppTheme(darkTheme = false) {
+        HomeScreen(navController = mockNavController, isDarkTheme = false, onThemeChange = {})
+    }
 }

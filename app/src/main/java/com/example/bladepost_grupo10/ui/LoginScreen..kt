@@ -1,6 +1,7 @@
 package com.example.bladepost_grupo10.ui
 
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
@@ -9,21 +10,25 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.bladepost_grupo10.R
 // 🚀 NECESITAS ESTA IMPORTACIÓN (Asumiendo que Screens está en el paquete raíz)
 import com.example.bladepost_grupo10.Screens
-import com.example.bladepost_grupo10.data.UsuarioDao
+import com.example.bladepost_grupo10.data.UsuarioDao // CLAVE: Se requiere tu implementación de la DB
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(navController: NavHostController) {
     val context = androidx.compose.ui.platform.LocalContext.current
+    // ⚠️ ATENCIÓN: Esta línea requiere que la clase UsuarioDao esté implementada.
     val usuarioDao = remember {UsuarioDao(context)}
 
     // BLOQUES REMOVIDOS Y REEMPLAZADOS POR LA IMPORTACIÓN DE ARRIBA
@@ -35,7 +40,7 @@ fun LoginScreen(navController: NavHostController) {
     var loginMessage by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
-    // Función de validación y navegación
+    // Función de validación y navegación (lógica de prueba antigua, reemplazada por la lógica del DAO)
     val onLoginClick: () -> Unit = {
         if (emailOrUser.isEmpty() || password.isEmpty()) {
             loginMessage = "Por favor, ingresa tu correo y contraseña."
@@ -66,6 +71,16 @@ fun LoginScreen(navController: NavHostController) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
         ) {
+            Image(
+                painter = painterResource(id = R.drawable.logo_nuevo),
+                contentDescription = "Logo App",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(160.dp)
+                    .padding(vertical = 16.dp),
+                contentScale = ContentScale.Fit,
+                alignment = Alignment.Center
+            )
 
             Text(
                 text = "BladePost Login",
@@ -73,7 +88,7 @@ fun LoginScreen(navController: NavHostController) {
                 modifier = Modifier.padding(bottom = 24.dp)
             )
 
-            // CAMPO DE CORREO / USUARIO
+            //CAMPO DE CORREO / USUARIO
             OutlinedTextField(
                 value = emailOrUser,
                 onValueChange = { emailOrUser = it },
@@ -108,6 +123,7 @@ fun LoginScreen(navController: NavHostController) {
                         emailOrUser.isEmpty() || password.isEmpty() -> {
                             Toast.makeText(context, "Completa todos los campos", Toast.LENGTH_SHORT).show()
                         }
+                        // Lógica principal usando el DAO
                         usuarioDao.verificarCredenciales(emailOrUser, password) -> {
                             Toast.makeText(context, "Inicio de sesion exitoso", Toast.LENGTH_SHORT).show()
                             navController.navigate(Screens.HOME_SCREEN){

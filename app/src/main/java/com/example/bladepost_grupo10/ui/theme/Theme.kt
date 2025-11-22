@@ -10,20 +10,37 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-
-// 🚀 IMPORTACIÓN CLAVE: Agrega esta línea
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
+
+// --- Importa tus colores base de Color.kt ---
+import com.example.bladepost_grupo10.ui.theme.Purple80
+import com.example.bladepost_grupo10.ui.theme.PurpleGrey80
+import com.example.bladepost_grupo10.ui.theme.Pink80
+import com.example.bladepost_grupo10.ui.theme.Purple40
+import com.example.bladepost_grupo10.ui.theme.PurpleGrey40
+import com.example.bladepost_grupo10.ui.theme.Pink40
+import com.example.bladepost_grupo10.ui.theme.Typography // Importación para la tipografía
+
+// 🚀 Tonalidades de Fondo Ajustadas (Fondo fijo)
+val DarkSurface = Color(0xFF1E1E1E)
+val DarkBackground = Color(0xFF121212) // Fondo fijo que deseamos
+val LightSurface = Color(0xFFFAFAFA)
+val LightTextOnDark = Color(0xFFFFFFFF) // Blanco para texto sobre fondo fijo
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
     secondary = PurpleGrey80,
     tertiary = Pink80,
 
-    // 🚀 CAMBIOS CLAVE PARA FONDO NEGRO
-    background = Color.Black, // Fondo principal: NEGRO
-    surface = Color.Black,    // Superficies como Cards o Scaffolds: NEGRO
-    onBackground = Color.White, // Color del texto sobre el fondo: BLANCO
-    onSurface = Color.White     // Color del texto sobre superficies: BLANCO
+    // MODO OSCURO: Fondo y Superficies oscuros
+    background = DarkBackground,
+    surface = DarkSurface,
+    onBackground = LightTextOnDark,
+    onSurface = LightTextOnDark
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -31,38 +48,41 @@ private val LightColorScheme = lightColorScheme(
     secondary = PurpleGrey40,
     tertiary = Pink40,
 
-    // 🚀 CAMBIOS CLAVE PARA FONDO BLANCO
-    background = Color.White,  // Fondo principal: BLANCO
-    surface = Color.White,     // Superficies como Cards o Scaffolds: BLANCO
-    onBackground = Color.Black,  // Color del texto sobre el fondo: NEGRO
-    onSurface = Color.Black      // Color del texto sobre superficies: NEGRO
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    // ✅ MODO CLARO MODIFICADO (FONDO FIJO OSCURO)
+    background = DarkBackground,  // <--- ¡EL FONDO ES SIEMPRE OSCURO!
+    surface = LightSurface,       // <--- Las Cards, TopBar, Switch, etc. tienen color CLARO
+    onBackground = LightTextOnDark,   // <--- Texto sobre fondo oscuro: Blanco
+    onSurface = Color.Black       // <--- Texto sobre superficies claras: Negro
 )
 
 @Composable
-fun BladePost_Grupo10Theme(
+fun AppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
+            //Nota: Aquí se usa el color dinámico, que podría sobreescribir el fondo fijo.
+            // Para asegurar el fondo fijo, considera desactivar dynamicColor si es clave.
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
 
         darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        else -> LightColorScheme // <--- Usamos el LightColorScheme modificado
+    }
+
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor = colorScheme.background.toArgb()
+
+            // Si el fondo es DarkBackground, los iconos de la barra deben ser Light (no oscuros)
+            // Por eso usamos '!darkTheme' para controlar la apariencia de los iconos.
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+        }
     }
 
     MaterialTheme(

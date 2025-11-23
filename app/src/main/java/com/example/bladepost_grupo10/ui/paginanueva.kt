@@ -17,7 +17,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.bladepost_grupo10.R // Asegúrate de tener esta importación
@@ -29,7 +28,7 @@ import com.example.bladepost_grupo10.ui.theme.AppTheme
 // Estructura para el contenido que lleva imagen
 data class DetailItem(val title: String, val description: String, val imageResId: Int)
 
-// 🚀 MAPA DE CONTENIDO VISUAL ASOCIADO A CADA CATEGORÍA (COMPLETO Y CON IMÁGENES)
+//  MAPA DE CONTENIDO VISUAL ASOCIADO A CADA CATEGORÍA (COMPLETO Y CON IMÁGENES)
 val dynamicDetailContent = mapOf(
     // 1: ATAQUE FEROZ
     1 to listOf(
@@ -109,7 +108,7 @@ fun DetailContentCard(item: DetailItem) {
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // ✅ AQUÍ SE MUESTRA LA IMAGEN USANDO EL ID DEL RECURSO
+            //  AQUÍ SE MUESTRA LA IMAGEN USANDO EL ID DEL RECURSO
             Image(
                 painter = painterResource(id = item.imageResId),
                 contentDescription = item.title,
@@ -162,68 +161,89 @@ fun DetailScreen(navController: NavHostController, categoryId: Int?) {
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
-        Column(
+        Box(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
-                .padding(horizontal = 16.dp)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.Start
+                .padding(
+                    horizontal = 16.dp,
+                    vertical = 8.dp
+                ), // Padding alrededor de la tarjeta principal
+            contentAlignment = Alignment.TopCenter
         ) {
-            //--- 1. SECCIÓN PRINCIPAL ---
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = " $categoryName",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = "Aquí encontrarás las partes clave, estrategias y consejos para dominar este tipo de Beyblade.",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            // --- 2. CONTENIDO DINÁMICO ---
-            Spacer(modifier = Modifier.height(24.dp))
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // 🚨 Búsqueda dinámica del contenido visual basado en el categoryId
-            val visualContent = dynamicDetailContent[categoryId] ?: emptyList()
-
-            // Itera sobre el contenido específico de la categoría
-            if (visualContent.isNotEmpty()) {
-                visualContent.forEach { item ->
-                    DetailContentCard(item = item)
-                }
-            } else {
-                Text(
-                    text = "No hay contenido visual específico para esta categoría.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            // -----------------------------------------------------------
-
-            // 🚀 ESPACIADOR CLAVE: Empuja el botón al final de la columna desplazable.
-            Spacer(modifier = Modifier.weight(1f))
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // 🚀 BOTÓN AL FINAL
-            Button(
-                onClick = { navController.navigate(Screens.HOME_SCREEN) },
-                modifier = Modifier.fillMaxWidth().height(50.dp)
+            //  CAMBIO CLAVE: Card para la sección de detalles
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.large,
+                colors = CardDefaults.cardColors(
+                    // Fondo de la tarjeta: color de superficie (claro/blanco) para contraste
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
             ) {
-                Text("Volver a Inicio")
+                Column(
+                    modifier = Modifier
+                        .padding(padding)
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp)
+                        .verticalScroll(rememberScrollState()),
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    //--- 1. SECCIÓN PRINCIPAL ---
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = " $categoryName",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Text(
+                        text = "Aquí encontrarás las partes clave, estrategias y consejos para dominar este tipo de Beyblade.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    // --- 2. CONTENIDO DINÁMICO ---
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    //  Búsqueda dinámica del contenido visual basado en el categoryId
+                    val visualContent = dynamicDetailContent[categoryId] ?: emptyList()
+
+                    // Itera sobre el contenido específico de la categoría
+                    if (visualContent.isNotEmpty()) {
+                        visualContent.forEach { item ->
+                            DetailContentCard(item = item)
+                        }
+                    } else {
+                        Text(
+                            text = "No hay contenido visual específico para esta categoría.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    // -----------------------------------------------------------
+
+                    //  ESPACIADOR CLAVE: Empuja el botón al final de la columna desplazable.
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    //  BOTÓN AL FINAL
+                    Button(
+                        onClick = { navController.navigate(Screens.HOME_SCREEN) },
+                        modifier = Modifier.fillMaxWidth().height(50.dp)
+                    ) {
+                        Text("Volver a Inicio")
+                    }
+                    Spacer(modifier = Modifier.height(16.dp)) // Padding inferior
+                }
             }
-            Spacer(modifier = Modifier.height(16.dp)) // Padding inferior
         }
     }
 }
-
 // --- 4. PREVIEW ---
 @Preview(showBackground = true)
 @Composable
@@ -232,5 +252,7 @@ fun DetailScreenPreview() {
     AppTheme(darkTheme = false) {
         // Previsualiza la categoría de Resistencia Infinita (ID 3)
         DetailScreen(navController = mockNavController, categoryId = 3)
+
+
     }
 }

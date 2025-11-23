@@ -19,7 +19,7 @@ import coil.compose.rememberAsyncImagePainter
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import com.example.bladepost_grupo10.R // Necesario para R.drawable.logo_nuevo
-// ✅ NUEVAS IMPORTACIONES: Acceso a las funciones de ForumScreen.kt
+//  NUEVAS IMPORTACIONES: Acceso a las funciones de ForumScreen.kt
 import com.example.bladepost_grupo10.ui.ForumPost
 import com.example.bladepost_grupo10.ui.addPost
 import com.example.bladepost_grupo10.ui.getNextPostId
@@ -30,7 +30,7 @@ fun PostFormScreen(navController: NavHostController) {
     var questionText by remember { mutableStateOf("") }
     var titleText by remember { mutableStateOf("") }
 
-    // 🚀 ESTADOS PARA LA FOTO
+    //  ESTADOS PARA LA FOTO
     var attachedImageUri by remember { mutableStateOf<Uri?>(null) }
     var showImagePickerDialog by remember { mutableStateOf(false) }
 
@@ -38,6 +38,7 @@ fun PostFormScreen(navController: NavHostController) {
     val currentUserName = "Usuario_Autenticado_123"
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = { Text("Crear Nueva Pregunta") },
@@ -51,7 +52,7 @@ fun PostFormScreen(navController: NavHostController) {
         }
     ) { paddingValues ->
 
-        //🚀 LLAMADA AL DIÁLOGO (asume que ImagePickerDialog existe en otro archivo)
+        // LLAMADA AL DIÁLOGO (asume que ImagePickerDialog existe en otro archivo)
         if (showImagePickerDialog) {
             // Se usa el ImagePickerDialog definido en PerfilScreen.kt
             // **NOTA: Este Composable ImagePickerDialog debe existir en tu proyecto.**
@@ -63,100 +64,117 @@ fun PostFormScreen(navController: NavHostController) {
                 }
             )
         }
-
-        Column(
+        Box(
             modifier = Modifier
+                .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.Top)
+                .padding(16.dp), // Padding alrededor de la tarjeta
+            contentAlignment = Alignment.TopCenter
         ) {
-
-            Text(
-                text = "Publicando como: ${currentUserName}",
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
-
-            OutlinedTextField(
-                value = titleText,
-                onValueChange = { titleText = it },
-                label = { Text("Título de la pregunta") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            OutlinedTextField(
-                value = questionText,
-                onValueChange = { questionText = it },
-                label = { Text("Describe tu pregunta...") },
+            // 🚨 CAMBIO 2: Usamos Card para contener el formulario y darle contraste (Fondo Claro/Blanco)
+            Card(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(150.dp)
-            )
-
-            // 🚀 BOTÓN Y VISTA PREVIA DE FOTO
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                    .fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium,
+                colors = CardDefaults.cardColors(
+                    // Usamos el color de Superficie (blanco/claro) para el fondo de la tarjeta
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
             ) {
-                Button(
-                    onClick = { showImagePickerDialog = true },
-                    contentPadding = if (attachedImageUri != null) PaddingValues(8.dp) else ButtonDefaults.ContentPadding
+                Column(
+                    modifier = Modifier
+                        .padding(20.dp), // Padding interno del formulario
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.Top)
                 ) {
-                    Icon(
-                        Icons.Filled.AddAPhoto,
-                        contentDescription = "Adjuntar Foto"
+
+                    Text(
+                        text = "Publicando como: ${currentUserName}",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.fillMaxWidth()
                     )
-                    if (attachedImageUri == null) {
-                        Spacer(Modifier.width(8.dp))
-                        Text("Adjuntar Foto")
+
+                    HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
+
+                    OutlinedTextField(
+                        value = titleText,
+                        onValueChange = { titleText = it },
+                        label = { Text("Título de la pregunta") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    OutlinedTextField(
+                        value = questionText,
+                        onValueChange = { questionText = it },
+                        label = { Text("Describe tu pregunta...") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(150.dp)
+                    )
+
+                    //  BOTÓN Y VISTA PREVIA DE FOTO
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Button(
+                            onClick = { showImagePickerDialog = true },
+                            contentPadding = if (attachedImageUri != null) PaddingValues(8.dp) else ButtonDefaults.ContentPadding
+                        ) {
+                            Icon(
+                                Icons.Filled.AddAPhoto,
+                                contentDescription = "Adjuntar Foto"
+                            )
+                            if (attachedImageUri == null) {
+                                Spacer(Modifier.width(8.dp))
+                                Text("Adjuntar Foto")
+                            }
+                        }
+
+                        Spacer(Modifier.width(16.dp))
+
+                        if (attachedImageUri != null) {
+                            Image(
+                                painter = rememberAsyncImagePainter(model = attachedImageUri),
+                                contentDescription = "Imagen adjunta",
+                                modifier = Modifier
+                                    .size(64.dp)
+                                    .clip(MaterialTheme.shapes.small),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                    }
+
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    Button(
+                        //  LÓGICA CORREGIDA: Crear y guardar el post en el estado global
+                        onClick = {
+                            val newPost = ForumPost(
+                                id = getNextPostId(), // Obtiene el ID
+                                userName = currentUserName,
+                                title = titleText,
+                                question = questionText,
+                                imageResId = if (attachedImageUri != null) R.drawable.logo_nuevo else null,
+                                commentCount = 0
+                            )
+
+                            addPost(newPost) // ¡Actualiza la lista reactiva!
+
+                            println("Pregunta enviada: Título='${titleText}' por el usuario '${currentUserName}', Foto adjunta: ${attachedImageUri != null}")
+                            navController.popBackStack() // Vuelve a ForumScreen, que se recompondrá
+                        },
+                        modifier = Modifier.fillMaxWidth().height(50.dp),
+                        enabled = titleText.isNotBlank() && questionText.isNotBlank()
+                    ) {
+                        Text("Publicar Pregunta")
                     }
                 }
-
-                Spacer(Modifier.width(16.dp))
-
-                if (attachedImageUri != null) {
-                    Image(
-                        painter = rememberAsyncImagePainter(model = attachedImageUri),
-                        contentDescription = "Imagen adjunta",
-                        modifier = Modifier
-                            .size(64.dp)
-                            .clip(MaterialTheme.shapes.small),
-                        contentScale = ContentScale.Crop
-                    )
-                }
-            }
-
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            Button(
-                // ✅ LÓGICA CORREGIDA: Crear y guardar el post en el estado global
-                onClick = {
-                    val newPost = ForumPost(
-                        id = getNextPostId(), // Obtiene el ID
-                        userName = currentUserName,
-                        title = titleText,
-                        question = questionText,
-                        imageResId = if (attachedImageUri != null) R.drawable.logo_nuevo else null,
-                        commentCount = 0
-                    )
-
-                    addPost(newPost) // ¡Actualiza la lista reactiva!
-
-                    println("Pregunta enviada: Título='${titleText}' por el usuario '${currentUserName}', Foto adjunta: ${attachedImageUri != null}")
-                    navController.popBackStack() // Vuelve a ForumScreen, que se recompondrá
-                },
-                modifier = Modifier.fillMaxWidth().height(50.dp),
-                enabled = titleText.isNotBlank() && questionText.isNotBlank()
-            ) {
-                Text("Publicar Pregunta")
             }
         }
     }

@@ -48,21 +48,20 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material.icons.filled.Close
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.bladepost_grupo10.Screens // 🚀 IMPORTACIÓN CLAVE AÑADIDA
+import com.example.bladepost_grupo10.Screens
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.ui.Alignment
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.ui.draw.clip // Importación necesaria
-
+import androidx.compose.ui.draw.clip
 
 // --- 1. DEFINICIONES DE DATOS Y TEMA ---
 
 data class Category(val id: Int, val name: String, val color: Color)
-data class NewsItem(val id: Int, val title: String, val summary: String, val imageUrl: Int) // CLASE AÑADIDA
+data class NewsItem(val id: Int, val title: String, val summary: String, val imageUrl: Int)
 data class ForumItem(val id: Int, val user: String, val comment: String, val categoryId: Int)
 
-// DATOS DE EJEMPLO DE NOTICIAS (Para uso futuro si se usa NewsCard)
+// DATOS DE EJEMPLO DE NOTICIAS
 val dummyNews = listOf(
     NewsItem(101, "Lanzamiento: Nuevo Bey de Resistencia", "Analizamos el nuevo modelo que promete un giro infinito.", R.drawable.noticia_resistencia),
     NewsItem(102, "Claves del Campeonato Mundial", "Las estrategias de balance que dominaron el torneo pasado.", R.drawable.noticia_balance),
@@ -137,8 +136,6 @@ fun CategoryChip(category: Category, onCategoryClick: (Category) -> Unit) {
     }
 }
 
-// Nota: No se está usando la función NewsCard en el código que enviaste, solo las imágenes sueltas.
-
 @Composable
 fun ForumCard(item: ForumItem) {
     Card(
@@ -181,19 +178,17 @@ fun ForumCard(item: ForumItem) {
 @Composable
 fun HomeScreen(
     navController: NavHostController,
-    onThemeChange: (Boolean) -> Unit,
-    isDarkTheme: Boolean
+    onThemeChange: (Boolean) -> Unit, // 💡 Usado para cambiar el estado externo del tema
+    isDarkTheme: Boolean // 💡 Usado para reflejar el estado actual del tema
 ) {
-    // ESTADOS
-    var isDarkTheme by remember { mutableStateOf(false)}
+    // ESTADOS INTERNOS (No relacionados con el tema)
     var isMenuExpanded by remember { mutableStateOf(false) }
     var selectedCategory by remember { mutableStateOf<Category?>(null) }
-
-    // ESTADOS DE BÚSQUEDA AÑADIDOS
     var isSearchVisible by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
 
 
+    // 🚀 Se usa el 'isDarkTheme' pasado por parámetro, no un estado local.
     AppTheme(darkTheme = isDarkTheme) {
         Scaffold(
             topBar = {
@@ -269,11 +264,11 @@ fun HomeScreen(
                         actions = {
                             // Switch de Tema
                             Switch(
-                                checked = isDarkTheme,
-                                onCheckedChange = { isDarkTheme = it }
+                                checked = isDarkTheme, // 🚀 Usa el parámetro isDarkTheme
+                                onCheckedChange = { onThemeChange(it) } // 🚀 Llama a la función onThemeChange
                             )
                             Text(
-                                text = if (isDarkTheme) "Oscuro" else "Claro",
+                                text = if (isDarkTheme) "Oscuro" else "Claro", // 🚀 Usa el parámetro isDarkTheme
                                 style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier.padding(end = 8.dp),
                                 color = MaterialTheme.colorScheme.onSurface
@@ -313,24 +308,25 @@ fun HomeScreen(
                 modifier = Modifier
                     .padding(innerPadding)
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.surface)
+                    // Fondo Naranja (Orange)
+                    .background(Color(0xFFFFA500))
                     .padding(horizontal = 16.dp)
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 Text(
                     text = "¡Bienvenido!",
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = Color.Black // Texto en negro para contraste con el fondo naranja
                 )
                 Text(
                     text = "Explora Categorías",
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(top = 8.dp),
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = Color.Black // Texto en negro para contraste con el fondo naranja
                 )
 
                 LazyRow(
-                    modifier = Modifier.fillMaxWidth().height(50.dp), // Ajuste para que LazyRow funcione dentro de Column scrollable
+                    modifier = Modifier.fillMaxWidth().height(50.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     // USAR LA LISTA FILTRADA EN EL LAZYROW
@@ -341,8 +337,6 @@ fun HomeScreen(
                         }
                     }
                 }
-
-
 
 
                 // Muestra un mensaje si no hay resultados y la búsqueda está activa
@@ -363,6 +357,7 @@ fun HomeScreen(
                 }
 
                 //* --- Bloque de Imágenes de Noticias (Sueltas) ---
+                // Nota: Las imágenes deben ser recursos válidos en la carpeta R.drawable
                 Image(
                     painter = painterResource(id = R.drawable.noticia_resistencia),
                     contentDescription = "resistencia",
@@ -392,7 +387,7 @@ fun HomeScreen(
                     text = "Últimas Noticias",
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(top = 8.dp),
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = Color.Black // Texto en negro
                 )
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     dummyNews.forEach { newsItem ->
@@ -419,7 +414,7 @@ fun HomeScreen(
                 Text(
                     text = "Últimos Comentarios del Foro",
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = Color.Black // Texto en negro
                 )
 
                 // LISTA ESTÁTICA DE COMENTARIOS/PREGUNTAS
@@ -435,7 +430,7 @@ fun HomeScreen(
                 Text(
                     text = "🔥 Eventos de la Comunidad",
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = Color.Black // Texto en negro
                 )
 
                 // Placeholder para la imagen "nuevo_evento" que no está definida
@@ -454,7 +449,7 @@ fun HomeScreen(
                 Text(
                     text = "¡Participa en el torneo semanal y gana piezas raras!",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = Color.Black // Texto en negro
                 )
                 Spacer(modifier = Modifier.height(20.dp))
 
@@ -462,7 +457,7 @@ fun HomeScreen(
                 Text(
                     text = "🥇 Top 5 Bladers de la Semana",
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = Color.Black // Texto en negro
                 )
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -503,12 +498,17 @@ fun HomeScreen(
 
 
 // --- 3. HOME SCREEN PREVIEW CORREGIDO ---
+// ❌ Se eliminó la sobrecarga vacía: fun HomeScreen(navController: NavHostController) {}
+// ✅ Se llama a la función principal con mock implementations de los parámetros faltantes.
 
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview(){
     val mockNavController = rememberNavController()
-    HomeScreen(navController = mockNavController,)
+    // 💡 Proporcionamos un mock de onThemeChange (que no hace nada en el Preview) y un valor inicial de isDarkTheme.
+    HomeScreen(
+        navController = mockNavController,
+        onThemeChange = { /* Mock function */ },
+        isDarkTheme = false // Empieza en modo claro para el Preview
+    )
 }
-
-fun HomeScreen(navController: NavHostController) {}

@@ -9,8 +9,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf // ✅ IMPORTACIÓN CLAVE
-import androidx.compose.runtime.snapshots.SnapshotStateList // ✅ IMPORTACIÓN CLAVE
+import androidx.compose.runtime.mutableStateListOf // IMPORTACIÓN CLAVE
+import androidx.compose.runtime.snapshots.SnapshotStateList //  IMPORTACIÓN CLAVE
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -73,17 +73,17 @@ private val initialDummyPosts = listOf(
     ForumPost(6, "TheSniper", "Estrategias de Arena", "Posiciones y ángulos para usar la resistencia de forma efectiva.", commentCount = 8)
 )
 
-// ✅ ESTADO GLOBAL Y REACTIVO DE POSTS (Reemplaza a val dummyPosts)
+//  ESTADO GLOBAL Y REACTIVO DE POSTS (Reemplaza a val dummyPosts)
 val forumPostsState: SnapshotStateList<ForumPost> = mutableStateListOf<ForumPost>().apply {
     addAll(initialDummyPosts)
 }
 
-// ✅ FUNCIÓN GLOBAL PARA AÑADIR POSTS (Usada por PostFormScreen.kt)
+//  FUNCIÓN GLOBAL PARA AÑADIR POSTS (Usada por PostFormScreen.kt)
 fun addPost(newPost: ForumPost) {
     forumPostsState.add(0, newPost) // Añadir al inicio para que aparezca primero
 }
 
-// ✅ FUNCIÓN GLOBAL PARA GENERAR ID (Usada por PostFormScreen.kt)
+//  FUNCIÓN GLOBAL PARA GENERAR ID (Usada por PostFormScreen.kt)
 fun getNextPostId(): Int {
     return (forumPostsState.maxByOrNull { it.id }?.id ?: 0) + 1
 }
@@ -135,7 +135,7 @@ fun ForumScreen(navController: NavHostController) {
             )
         },
 
-        // ✅ Botón flotante para navegar (Se mantiene la corrección de ruta anterior)
+        // Botón flotante para navegar (Se mantiene la corrección de ruta anterior)
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { navController.navigate(Screens.POST_FORM_SCREEN) } // Asumiendo POST_FORM_SCREEN
@@ -161,7 +161,7 @@ fun ForumScreen(navController: NavHostController) {
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
             }
-            // ✅ CORRECCIÓN CLAVE: Ahora usa el estado mutable
+            //  CORRECCIÓN CLAVE: Ahora usa el estado mutable
             items(forumPostsState) { post ->
                 ForumPostCard(post = post) { clickedPost ->
                     // Navegar a la pantalla de detalle del post (si existe)

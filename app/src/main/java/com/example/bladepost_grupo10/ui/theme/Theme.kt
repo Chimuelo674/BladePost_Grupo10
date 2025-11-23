@@ -23,13 +23,15 @@ import com.example.bladepost_grupo10.ui.theme.Pink80
 import com.example.bladepost_grupo10.ui.theme.Purple40
 import com.example.bladepost_grupo10.ui.theme.PurpleGrey40
 import com.example.bladepost_grupo10.ui.theme.Pink40
-import com.example.bladepost_grupo10.ui.theme.Typography // Importación para la tipografía
+import com.example.bladepost_grupo10.ui.theme.VibrantSunsetOrange
+import com.example.bladepost_grupo10.ui.theme.Typography
 
-// 🚀 Tonalidades de Fondo Ajustadas (Fondo fijo)
+// 🚀 Tonalidades de Fondo Ajustadas
 val DarkSurface = Color(0xFF1E1E1E)
-val DarkBackground = Color(0xFF121212) // Fondo fijo que deseamos
+val DarkBackground = Color(0xFF121212)
 val LightSurface = Color(0xFFFAFAFA)
-val LightTextOnDark = Color(0xFFFFFFFF) // Blanco para texto sobre fondo fijo
+val LightTextOnDark = Color(0xFFFFFFFF) // Blanco
+val DarkTextOnLight = Color(0xFF000000) // Negro
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -48,29 +50,25 @@ private val LightColorScheme = lightColorScheme(
     secondary = PurpleGrey40,
     tertiary = Pink40,
 
-    // ✅ MODO CLARO MODIFICADO (FONDO FIJO OSCURO)
-    background = DarkBackground,  // <--- ¡EL FONDO ES SIEMPRE OSCURO!
-    surface = LightSurface,       // <--- Las Cards, TopBar, Switch, etc. tienen color CLARO
-    onBackground = LightTextOnDark,   // <--- Texto sobre fondo oscuro: Blanco
-    onSurface = Color.Black       // <--- Texto sobre superficies claras: Negro
+    // ✅ CORRECCIÓN CLAVE: Fondo NARANJA atractivo en modo CLARO
+    background = VibrantSunsetOrange,
+    surface = LightSurface,
+    onBackground = DarkTextOnLight,   // Texto sobre fondo naranja (negro para contraste)
+    onSurface = DarkTextOnLight
 )
 
 @Composable
 fun AppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    // 🚨 Desactivar DynamicColor para asegurar que el fondo NARANJA fijo se aplique
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            //Nota: Aquí se usa el color dinámico, que podría sobreescribir el fondo fijo.
-            // Para asegurar el fondo fijo, considera desactivar dynamicColor si es clave.
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
+        // La lógica DynamicColor se salta porque dynamicColor es false
 
         darkTheme -> DarkColorScheme
-        else -> LightColorScheme // <--- Usamos el LightColorScheme modificado
+        else -> LightColorScheme // <--- Usa el tema con fondo Naranja
     }
 
     val view = LocalView.current
@@ -79,9 +77,11 @@ fun AppTheme(
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.background.toArgb()
 
-            // Si el fondo es DarkBackground, los iconos de la barra deben ser Light (no oscuros)
-            // Por eso usamos '!darkTheme' para controlar la apariencia de los iconos.
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+            // Lógica para que los iconos de la barra de estado sean legibles:
+            // Si el fondo del tema es CLARO (Naranja), los iconos deben ser OSCUROS (true).
+            val isBackgroundLight = colorScheme.background == VibrantSunsetOrange
+
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = isBackgroundLight
         }
     }
 

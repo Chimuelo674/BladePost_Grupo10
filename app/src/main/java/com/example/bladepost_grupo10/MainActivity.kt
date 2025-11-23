@@ -79,7 +79,7 @@ fun AppNavigation(
         // ✅ CORRECCIÓN APLICADA: Pasamos el parámetro currentUserName
         composable(Screens.POST_FORM_SCREEN) {
             PostFormScreen(
-                navController = navController // ✅ Solo pasamos navController
+                navController = navController
             )
         }
         composable(

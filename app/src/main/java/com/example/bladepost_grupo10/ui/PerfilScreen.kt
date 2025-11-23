@@ -37,36 +37,32 @@ import com.google.accompanist.permissions.shouldShowRationale
 import android.Manifest
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-// 🚀 IMPORTACIONES ADICIONALES PARA PERSISTENCIA
 import androidx.core.net.toUri
 import java.io.File
 import java.io.FileOutputStream
 import java.lang.Exception
 import android.content.Context
-// ----------------------------------------
+import kotlinx.coroutines.launch
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.runtime.saveable.rememberSaveable
 
-// --- FUNCIÓN AUXILIAR PARA PERSISTIR LA IMAGEN ---
+// --- FUNCIÓN AUXILIAR PARA PERSISTIR LA IMAGEN (Acepta userId) ---
 /**
- * Copia el contenido de una URI de origen (temporal) a un archivo permanente
- * en el almacenamiento interno de la aplicación y devuelve la nueva URI.
+ * Copia el contenido de una URI de origen a un archivo permanente con un nombre único basado en el userId.
  */
-private fun persistImageUri(context: Context, sourceUri: Uri): Uri? {
-    // Archivo de destino permanente
-    val destFile = File(context.filesDir, "profile_pic_persisted.jpg")
+private fun persistImageUri(context: Context, sourceUri: Uri, userId: String): Uri? {
+    // 💡 SOLUCIÓN: Usar el userId en el nombre del archivo
+    val destFile = File(context.filesDir, "profile_pic_user_${userId}.jpg")
     try {
-        // Abre el InputStream de la URI de origen (cámara o galería)
         context.contentResolver.openInputStream(sourceUri)?.use { inputStream ->
-            // Abre el OutputStream del archivo de destino
             FileOutputStream(destFile).use { outputStream ->
-                // Copia los bytes
                 inputStream.copyTo(outputStream)
             }
         }
-        // Devuelve la URI del archivo guardado permanentemente
         return destFile.toUri()
     } catch (e: Exception) {
         e.printStackTrace()
-        // Si falla, devuelve null
         return null
     }
 }
@@ -77,142 +73,192 @@ private fun persistImageUri(context: Context, sourceUri: Uri): Uri? {
 fun PerfilScreen(navController: NavHostController){
     val context = LocalContext.current
 
-    // 🚀 ESTADOS PARA LA EDICIÓN Y PERSISTENCIA DE FOTO
-    // Se cargan valores iniciales o simulados
-    var userName by remember{ mutableStateOf("Nombre de ejemplo") }
-    var userEmail by remember() { mutableStateOf("correo de ejemplo@email.com")}
+    // 💡 SIMULACIÓN DE ID DE USUARIO: En una app real, este ID vendría de Firebase Auth (e.g., auth.currentUser?.uid)
+    // Usamos rememberSaveable para mantener el ID simulado
+    val currentUserId = rememberSaveable { mutableStateOf("user_A_123") }.value // Mock ID fijo para A
+    // Si quisieras simular que el usuario cambia, tendrías que cambiar este estado en el login/logout
 
-    // 🚀 Cargar la foto guardada al iniciar
+    // 1. ESTADOS PARA EL SNACKBAR
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    // ESTADOS PARA LA EDICIÓN Y PERSISTENCIA DE FOTO
+    var userName by remember{ mutableStateOf("Tyson Granger") }
+    var userEmail by remember() { mutableStateOf("tyson.granger@wbba.org")}
+
+    // Cargar la foto guardada al iniciar
+    // 💡 SOLUCIÓN: Buscar el archivo con el nombre único del usuario actual
     var profileImageUri by remember {
         mutableStateOf(
-            File(context.filesDir, "profile_pic_persisted.jpg")
+            File(context.filesDir, "profile_pic_user_${currentUserId}.jpg")
                 .takeIf { it.exists() }?.toUri()
         )
     }
     var showImagePickerDialog by remember {mutableStateOf(false)}
 
+    // 2. FUNCIÓN CENTRALIZADA PARA PERSISTENCIA Y FEEDBACK
+    val handleImagePersistence: (Uri) -> Unit = { uri ->
+        // 💡 SOLUCIÓN: Pasar el userId a la función de guardado
+        val newUri = persistImageUri(context, uri, currentUserId)
+        profileImageUri = newUri
+        showImagePickerDialog = false
+
+        scope.launch {
+            if (newUri != null) {
+                snackbarHostState.showSnackbar(
+                    message = "Foto de perfil guardada exitosamente.",
+                    duration = SnackbarDuration.Short
+                )
+            } else {
+                snackbarHostState.showSnackbar(
+                    message = "Error al guardar la imagen.",
+                    duration = SnackbarDuration.Short
+                )
+            }
+        }
+    }
+
     Scaffold(
+        // 3. AÑADIR EL HOST DEL SNACKBAR
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar ={
             TopAppBar(
-                title = { Text("Mi perfil") },
+                title = { Text("Mi Perfil - ID: ${currentUserId}") }, // Mostrar ID simulado para debug
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack()}) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "volver")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
                     }
                 }
             )
         }
     ){paddingValues ->
-        Column(
+        // Contenedor principal con Scroll y relleno
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 24.dp)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top
+                .verticalScroll(rememberScrollState())
+                .padding(24.dp), // Relleno exterior para la tarjeta
+            contentAlignment = Alignment.TopCenter
         ) {
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // SECCIÓN DE FOTO DE PERFIL CON BOTÓN DE EDICIÓN
-            Box(
+            // INICIO DE LA TARJETA BLANCA
+            Card(
                 modifier = Modifier
-                    .size(150.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha= 0.2f)),
-                contentAlignment = Alignment.Center
-            ){
-                if(profileImageUri !=null) {
-                    Image(
-                        painter = rememberAsyncImagePainter(model = profileImageUri),
-                        contentDescription = "Foto de Perfil",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Icon(
-                        Icons.Filled.Person,
-                        contentDescription = "Placeholder de foto",
-                        modifier = Modifier.size(100.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                // Botón de Edición (Icono Edit)
-                Icon(
-                    imageVector = Icons.Filled.Edit,
-                    contentDescription = "Editar foto",
+                    .fillMaxWidth()
+                    .align(Alignment.TopCenter), // Asegura que la tarjeta esté centrada si no llena el ancho
+                shape = MaterialTheme.shapes.large,
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+            ) {
+                Column(
                     modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary)
-                        .align(Alignment.BottomEnd)
-                        .clickable { showImagePickerDialog = true }
-                        .padding(8.dp),
-                    tint = Color.White
-                )
-            }
+                        .fillMaxWidth()
+                        .padding(24.dp), // Relleno interior para los elementos de la tarjeta
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Top
+                ) {
 
-            Spacer(modifier = Modifier.height(32.dp))
+                    // SECCIÓN DE FOTO DE PERFIL
+                    Box(
+                        modifier = Modifier
+                            .size(150.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha= 0.2f))
+                            .clickable { showImagePickerDialog = true },
+                        contentAlignment = Alignment.Center
+                    ){
+                        if(profileImageUri !=null) {
+                            Image(
+                                painter = rememberAsyncImagePainter(model = profileImageUri),
+                                contentDescription = "Foto de Perfil",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Icon(
+                                Icons.Filled.Person,
+                                contentDescription = "Placeholder de foto",
+                                modifier = Modifier.size(100.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
 
-            // 🚀 CAMPOS EDITABLES
-            OutlinedTextField(
-                value = userName,
-                onValueChange = {userName = it},
-                label = { Text("Nombre del usuario")},
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(16.dp))
+                        // Botón de Edición
+                        Icon(
+                            imageVector = Icons.Filled.Edit,
+                            contentDescription = "Editar foto",
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary)
+                                .align(Alignment.BottomEnd)
+                                .padding(8.dp),
+                            tint = Color.White
+                        )
+                    }
 
-            OutlinedTextField(
-                value = userEmail,
-                onValueChange = {userEmail = it},
-                label = { Text("Correo Electrónico")},
-                modifier = Modifier.fillMaxWidth()
-            )
+                    Spacer(modifier = Modifier.height(32.dp))
 
-            Spacer(modifier = Modifier.height(32.dp))
+                    // CAMPOS EDITABLES
+                    OutlinedTextField(
+                        value = userName,
+                        onValueChange = {userName = it},
+                        label = { Text("Nombre del usuario")},
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
 
-            // 🚀 BOTÓN DE GUARDAR CAMBIOS
-            Button(
-                onClick = {
-                    // 💡 Lógica para guardar userName y userEmail en la BD
-                    println("Guardando: User=$userName, Email=$userEmail")
-                },
-                modifier = Modifier.fillMaxWidth().height(50.dp)
-            ) {
-                Text("Guardar Cambios de Perfil")
-            }
+                    OutlinedTextField(
+                        value = userEmail,
+                        onValueChange = {userEmail = it},
+                        label = { Text("Correo Electrónico")},
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
-            Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(32.dp))
 
-            // Botón de Cerrar Sesión (simulado)
-            Button(
-                onClick = { navController.navigate(Screens.LOGIN_SCREEN) { popUpTo(Screens.HOME_SCREEN) { inclusive = true } } },
-                modifier = Modifier.fillMaxWidth().height(50.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-            ) {
-                Text("Cerrar Sesión")
-            }
+                    // BOTÓN DE GUARDAR CAMBIOS DE PERFIL
+                    Button(
+                        onClick = {
+                            // Simular la persistencia y mostrar feedback
+                            scope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message = "Cambios de perfil guardados.",
+                                    duration = SnackbarDuration.Short
+                                )
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth().height(50.dp)
+                    ) {
+                        Text("Guardar Cambios de Perfil")
+                    }
 
-            //🚀 LLAMADA AL DIÁLOGO CON PERSISTENCIA
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Botón de Cerrar Sesión (simulado)
+                    Button(
+                        onClick = {
+                            // 💡 Nota: Al simular el cierre de sesión, en un caso real se cambiaría currentUserId
+                            navController.navigate(Screens.LOGIN_SCREEN) { popUpTo(Screens.HOME_SCREEN) { inclusive = true } }
+                        },
+                        modifier = Modifier.fillMaxWidth().height(50.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Text("Cerrar Sesión")
+                    }
+                }
+            } // FIN DE LA TARJETA BLANCA
+
+            // LLAMADA AL DIÁLOGO CON PERSISTENCIA
             if(showImagePickerDialog){
                 ImagePickerDialog(
                     onDismissRequest = {showImagePickerDialog = false},
-                    onImageSelected = { uri ->
-                        // ✅ Persiste la nueva URI antes de asignarla a profileImageUri
-                        profileImageUri = persistImageUri(context, uri)
-                        showImagePickerDialog = false
-                    }
+                    onImageSelected = handleImagePersistence // Usa la función con Snackbar
                 )
             }
         }
     }
 }
 
-// ----------------------------------------------------------------------
-//ImagePickerDialog - DEFINIDO GLOBALMENTE PARA QUE POSTFORMSCREEN PUEDA USARLO
-// ----------------------------------------------------------------------
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun ImagePickerDialog(
@@ -233,8 +279,6 @@ fun ImagePickerDialog(
             if (success) {
                 tempPhotoUri?.let { onImageSelected(it) }
             }
-            onDismissRequest()
-            tempPhotoUri = null
 
         }
     )
@@ -242,7 +286,7 @@ fun ImagePickerDialog(
         contract = ActivityResultContracts.GetContent(),
         onResult = {uri : Uri? ->
             uri?.let { onImageSelected(it) }
-            onDismissRequest()
+            // onImageSelected ya maneja el cierre de showImagePickerDialog = false
         }
     )
     AlertDialog(
@@ -280,7 +324,7 @@ fun ImagePickerDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismissRequest) {
-                Text("cancelar")
+                Text("Cancelar")
             }
         }
     )
